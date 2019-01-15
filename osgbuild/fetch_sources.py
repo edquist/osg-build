@@ -42,14 +42,75 @@ def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
     tag = _get_required_attr(kw, 'tag', line)
     name = kw.get('name', re.sub(r'\.git$', '', os.path.basename(url)))
     hash_ = kw.get('hash') if nocheck else _get_required_attr(kw, 'hash', line)
-    rpm_spec = want_spec and kw.get('rpm_spec', "rpm/%s.spec" % name)
+    spec = want_spec and kw.get('spec', "rpm/%s.spec" % name)
 
+    run_with_tmp_git_dir(lambda:
+        git_archive_remote_ref(destdir, nocheck, url, tag, name, hash_, spec))
+
+# no git dir stack version
+def run_with_tmp_git_dir(call)
+    git_dir = tempfile.mkdtemp(dir=destdir)
+    os.putenv('GIT_DIR', git_dir)
     try:
-        git_dir = tempfile.mkdtemp(dir=destdir)
+        return call()
     finally:
         shutil.rmtree(git_dir)
+        os.unsetenv('GIT_DIR')
 
+## git dir stack version
+#def run_with_tmp_git_dir(call)
+#    git_dir = tempfile.mkdtemp(dir=destdir)
+#    old_git_dir = update_env('GIT_DIR', git_dir)
+#    try:
+#        return call()
+#    finally:
+#        shutil.rmtree(git_dir)
+#        update_env('GIT_DIR', old_git_dir)
+#
+#def update_env(key, value):
+#    oldval = os.getenv(key)
+#    if value is None:
+#        os.unsetenv(key)
+#    else:
+#        os.putenv(key, value)
+#    return oldval
 
+def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
+    utils.checked_call(['git', 'init', '--bare'])
+    utils.checked_call(['git', 'remote', 'add', 'origin', url])
+    utils.checked_call(['git', 'fetch', '--depth=1', 'origin', tag])
+    got_sha = utils.checked_backtick(['git', 'rev-parse', 'FETCH_HEAD'])
+    if hash_ or not nocheck:
+        check_git_hash(url, tag, hash_, got_sha, nocheck)
+
+    dest_tar = "%s/%s.tar" % (destdir, prefix)
+    dest_tar_gz = dest_tar + ".gz"
+    utils.checked_call(
+        ['git', 'archive', '--format=tar', '--prefix=%s/' % prefix,
+                           '--output=%s' % dest_tar, got_sha])
+
+    # TODO: combine with git-archive, in pipeline or with format=tar.gz
+    # (to avoid writing the extra uncompressed version)
+    # might want to open final tar.gz ourself also, if pipeline
+    utils.checked_call(["gzip", "-fn", dest_tar])
+
+    if spec:
+        dest_spec = "%s/%s.tar" % (destdir, os.basename(spec))
+        with open(dest_spec, "w") as spec_out:
+            spec_rev = '%s:%s' % (got_sha, spec)
+            # XXX: unchecked to allow non-existing spec?
+            utils.checked_call(['git', 'show', spec_rev], stdout=spec_out)
+
+    return got_sha, dest_tar_gz, spec
+
+def check_git_hash(url, tag, sha, got_sha, nocheck):
+    efmt = "Hash mismatch for %s tag %s\n    expected: %s\n    actual:   %s"
+    if sha != got_sha and deref_git_sha(sha) != deref_git_sha(got_sha):
+        msg = efmt % (url, tag, sha, got_sha)
+        if nocheck:
+            log.warning(msg + "\n    (ignored)")
+        else:
+            raise Error(msg)
 
 def parse_meta_url(line, nocheck):
     """
@@ -67,6 +128,7 @@ def parse_meta_url(line, nocheck):
         name=tarball_package_name
         tag=refname
         hash=commit_sha1
+        spec=rpm/NAME.spec
     """
 
     kv = [ entry.split("=", 1) for entry in line.split() ]
