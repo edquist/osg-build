@@ -32,6 +32,25 @@ else:
     logging.basicConfig(format="%(message)s", level=logging.INFO)
 
 
+def _get_required_attr(kw, key, line):
+    if key not in kw:
+        raise Error("No %s specified for line: %s" % (key, line))
+    return kw[key]
+
+def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
+    url = _get_required_attr(kw, 'url', line)
+    tag = _get_required_attr(kw, 'tag', line)
+    name = kw.get('name', re.sub(r'\.git$', '', os.path.basename(url)))
+    hash_ = kw.get('hash') if nocheck else _get_required_attr(kw, 'hash', line)
+    rpm_spec = want_spec and kw.get('rpm_spec', "rpm/%s.spec" % name)
+
+    try:
+        git_dir = tempfile.mkdtemp(dir=destdir)
+    finally:
+        shutil.rmtree(git_dir)
+
+
+
 def parse_meta_url(line, nocheck):
     """
     fields:
