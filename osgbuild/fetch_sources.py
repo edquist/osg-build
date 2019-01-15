@@ -32,6 +32,34 @@ else:
     logging.basicConfig(format="%(message)s", level=logging.INFO)
 
 
+def parse_meta_url(line, nocheck):
+    """
+    fields:
+        type={git|github|vdt-upstream|uri}
+        repo=owner/reponame  # type=github only
+        path=name/version/filename  # vdt-upstream only
+        # url for uri type
+        # filename for uri type (might not match uri suffix)
+        # auto filename for uri type respecting content-disposition
+        sha1sum=file_checksum  # mainly for non-git, but can use for git also
+        # or checksum=file_checksum checksum_type=sha1sum, etc,
+        # which we might use internally anyway
+        url=git_clone_url
+        name=tarball_package_name
+        tag=refname
+        hash=commit_sha1
+    """
+
+    kv = [ entry.split("=", 1) for entry in line.split() ]
+    args = filter((lambda t: len(t) == 1), kv)
+    kv   = filter((lambda t: len(t) == 2), kv)
+
+    len(args) <= 1 # OR ELSE
+
+    # now can use this for ALL source lines... mmm...
+
+
+
 def process_meta_url(line, destdir, nocheck):
     """
     Process a serialized URL spec.  Should be of the format:
