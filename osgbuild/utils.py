@@ -120,8 +120,8 @@ def unchecked_pipeline(cmd1, cmd2, stdin=None, stdout=None, **kw):
     Prints the commands to run and the results if loglevel is DEBUG.
     """
     log.debug("Running %s | %s" % (cmd1, cmd2))
-    p1 = subprocess.Popen(git_archive_cmd, stdout=subprocess.PIPE, **kw)
-    p2 = subprocess.Popen(gzip_cmd, stdin=p1.stdout, stdout=stdout, **kw)
+    p1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE, **kw)
+    p2 = subprocess.Popen(cmd2, stdin=p1.stdout, stdout=stdout, **kw)
     p1.stdout.close()
     p1.stdout = None
     e1 = p1.wait()

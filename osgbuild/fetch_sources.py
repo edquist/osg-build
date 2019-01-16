@@ -44,11 +44,11 @@ def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
     hash_ = kw.get('hash') if nocheck else _get_required_attr(kw, 'hash', line)
     spec = want_spec and kw.get('spec', "rpm/%s.spec" % name)
 
-    return run_with_tmp_git_dir(lambda:
+    return run_with_tmp_git_dir(destdir, lambda:
         git_archive_remote_ref(destdir, nocheck, url, tag, name, hash_, spec))
 
 # no git dir stack version
-def run_with_tmp_git_dir(call)
+def run_with_tmp_git_dir(destdir, call):
     git_dir = tempfile.mkdtemp(dir=destdir)
     os.putenv('GIT_DIR', git_dir)
     try:
@@ -85,7 +85,7 @@ def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
 
     dest_tar_gz = "%s/%s.tar" % (destdir, prefix)
     git_archive_cmd = ['git', 'archive', '--format=tar',
-                                         '--prefix=%s/' % prefix, got_sha])
+                                         '--prefix=%s/' % prefix, got_sha]
     gzip_cmd = ['gzip', '-n']
 
     with open(dest_tar_gz, "w") as destf:
@@ -97,7 +97,7 @@ def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
     return got_sha, dest_tar_gz, spec
 
 def try_get_spec(destdir, got_sha, spec):
-    dest_spec = "%s/%s" % (destdir, os.basename(spec))
+    dest_spec = "%s/%s" % (destdir, os.path.basename(spec))
     spec_rev = '%s:%s' % (got_sha, spec)
     with open(dest_spec, "w") as specf:
         rc = utils.unchecked_call(['git', 'show', spec_rev], stdout=specf)
@@ -161,7 +161,7 @@ def process_meta_url(line, destdir, nocheck, want_spec=True):
     a,kv = parse_meta_url(line, nocheck)
 
     if kv.get('type') == 'git':
-        sha, tar_gz, spec =
+        sha, tar_gz, spec = \
             fetch_git_source(kv, destdir, nocheck, want_spec, line)
         files = list(filter(None, (tar_gz, spec)))
         return files
