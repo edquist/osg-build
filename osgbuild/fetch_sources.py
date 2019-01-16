@@ -40,7 +40,7 @@ def _get_required_attr(kw, key, line):
 def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
     url = _get_required_attr(kw, 'url', line)
     tag = _get_required_attr(kw, 'tag', line)
-    name = kw.get('name', re.sub(r'\.git$', '', os.path.basename(url)))
+    name = kw.get('name') or re.sub(r'\.git$', '', os.path.basename(url))
     hash_ = kw.get('hash') if nocheck else _get_required_attr(kw, 'hash', line)
     spec = want_spec and kw.get('spec', "rpm/%s.spec" % name)
 
