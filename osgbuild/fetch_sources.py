@@ -136,8 +136,8 @@ def parse_meta_url(line, nocheck):
     """
 
     kv = [ entry.split("=", 1) for entry in line.split() ]
-    args = filter((lambda t: len(t) == 1), kv)
-    kv   = filter((lambda t: len(t) == 2), kv)
+    args = [ a[0] for a in filter((lambda t: len(t) == 1), kv) ]
+    kv = dict( filter((lambda t: len(t) == 2), kv) )
 
     len(args) <= 1 # OR ELSE
 
