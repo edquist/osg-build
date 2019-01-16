@@ -37,15 +37,26 @@ def _get_required_attr(kw, key, line):
         raise Error("No %s specified for line: %s" % (key, line))
     return kw[key]
 
+def _mk_prefix(name, tag, tarball):
+    if tarball:
+        if not tarball.endswith('.tar.gz'):
+            raise Error("tarball must end with .tar.gz: %s" % line)
+        prefix = tarball[:-len('.tar.gz')]
+    else:
+        tarball_version = re.match(r'(?:v(?=\d))?([^-]+)', tag).group(1)
+        prefix = "%s-%s" % (name, tarball_version)
+    return prefix
+
 def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
     url = _get_required_attr(kw, 'url', line)
     tag = _get_required_attr(kw, 'tag', line)
     name = kw.get('name') or re.sub(r'\.git$', '', os.path.basename(url))
     hash_ = kw.get('hash') if nocheck else _get_required_attr(kw, 'hash', line)
     spec = want_spec and kw.get('spec', "rpm/%s.spec" % name)
+    prefix = _mk_prefix(name, tag, kw.get('tarball'))
 
     return run_with_tmp_git_dir(destdir, lambda:
-        git_archive_remote_ref(destdir, nocheck, url, tag, name, hash_, spec))
+        git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec))
 
 def run_with_tmp_git_dir(destdir, call):
     git_dir = tempfile.mkdtemp(dir=destdir)
@@ -72,7 +83,7 @@ def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
     if hash_ or not nocheck:
         check_git_hash(url, tag, hash_, got_sha, nocheck)
 
-    dest_tar_gz = "%s/%s.tar" % (destdir, prefix)
+    dest_tar_gz = "%s/%s.tar.gz" % (destdir, prefix)
     git_archive_cmd = ['git', 'archive', '--format=tar',
                                          '--prefix=%s/' % prefix, got_sha]
     gzip_cmd = ['gzip', '-n']
