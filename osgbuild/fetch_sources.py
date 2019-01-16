@@ -47,6 +47,16 @@ def _mk_prefix(name, tag, tarball):
         prefix = "%s-%s" % (name, tarball_version)
     return prefix
 
+def fetch_github_source(kw, destdir='.', nocheck=False, want_spec=False,
+                        line=''):
+    repo = _get_required_attr(kw, 'repo', line)
+    m = re.match(r"([^\s/]+)/([^\s/]+?)(?:.git)?$", repo)
+    if not m:
+        raise Error("Repo syntax must be owner/project: %s" % line)
+    url = "https://github.com/" + repo
+    newkw = dict(kw, url=url)
+    return fetch_git_source(newkw, destdir, nocheck, want_spec, line)
+
 def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
     url = _get_required_attr(kw, 'url', line)
     tag = _get_required_attr(kw, 'tag', line)
@@ -160,9 +170,14 @@ def process_meta_url(line, destdir, nocheck, want_spec=True):
 
     a,kv = parse_meta_url(line, nocheck)
 
-    if kv.get('type') == 'git':
-        sha, tar_gz, spec = \
-            fetch_git_source(kv, destdir, nocheck, want_spec, line)
+    handlers = dict(
+        git    = fetch_git_source,
+        github = fetch_github_source,
+    )
+    meta_type = kv.get('type')
+    if meta_type in handlers:
+        fetch_source = handlers[meta_type]
+        sha, tar_gz, spec = fetch_source(kv, destdir, nocheck, want_spec, line)
         files = list(filter(None, (tar_gz, spec)))
         return files
 
