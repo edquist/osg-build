@@ -40,7 +40,7 @@ def _get_required_attr(kw, key, line):
 def _mk_prefix(name, tag, tarball):
     if tarball:
         if not tarball.endswith('.tar.gz'):
-            raise Error("tarball must end with .tar.gz: %s" % line)
+            raise Error("tarball must end with .tar.gz: '%s'" % tarball)
         prefix = tarball[:-len('.tar.gz')]
     else:
         tarball_version = re.match(r'(?:v(?=\d))?([^-]+)', tag).group(1)
