@@ -146,7 +146,7 @@ def parse_meta_url(line, nocheck):
     return args, kv
 
 
-def process_meta_url(line, destdir, nocheck):
+def process_meta_url(line, destdir, nocheck, want_spec=True):
     """
     Process a serialized URL spec.  Should be of the format:
      type=git url=https://github.com/opensciencegrid/cvmfs-config-osg.git name=cvmfs-config-osg tag=0.1 hash=e2b54cd1b94c9e3eaee079490c9d85f193c52249
@@ -157,6 +157,15 @@ def process_meta_url(line, destdir, nocheck):
 
     If nocheck is True, hashes do not have to match.
     """
+
+    a,kv = parse_meta_url(line, nocheck)
+
+    if kv.get('type') == 'git':
+        sha, tar_gz, spec =
+            fetch_git_source(kv, destdir, nocheck, want_spec, line)
+        files = list(filter(None, (tar_gz, spec)))
+        return files
+
     contents = {}
     for entry in line.split():
         info = entry.split("=", 1)
