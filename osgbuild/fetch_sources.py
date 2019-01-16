@@ -83,16 +83,13 @@ def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
     if hash_ or not nocheck:
         check_git_hash(url, tag, hash_, got_sha, nocheck)
 
-    dest_tar = "%s/%s.tar" % (destdir, prefix)
-    dest_tar_gz = dest_tar + ".gz"
-    utils.checked_call(
-        ['git', 'archive', '--format=tar', '--prefix=%s/' % prefix,
-                           '--output=%s' % dest_tar, got_sha])
+    dest_tar_gz = "%s/%s.tar" % (destdir, prefix)
+    git_archive_cmd = ['git', 'archive', '--format=tar',
+                                         '--prefix=%s/' % prefix, got_sha])
+    gzip_cmd = ['gzip', '-n']
 
-    # TODO: combine with git-archive, in pipeline or with format=tar.gz
-    # (to avoid writing the extra uncompressed version)
-    # might want to open final tar.gz ourself also, if pipeline
-    utils.checked_call(["gzip", "-fn", dest_tar])
+    with open(dest_tar_gz, "w") as destf:
+        utils.checked_pipeline(git_archive_cmd, gzip_cmd, stdout=destf)
 
     if spec:
         dest_spec = "%s/%s.tar" % (destdir, os.basename(spec))
