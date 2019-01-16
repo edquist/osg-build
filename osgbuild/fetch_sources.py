@@ -92,17 +92,20 @@ def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
         utils.checked_pipeline(git_archive_cmd, gzip_cmd, stdout=destf)
 
     if spec:
-        dest_spec = "%s/%s" % (destdir, os.basename(spec))
-        spec_rev = '%s:%s' % (got_sha, spec)
-        with open(dest_spec, "w") as specf:
-            rc = utils.unchecked_call(['git', 'show', spec_rev], stdout=specf)
-        if rc:
-            log.debug("No spec file found under %s" % spec_rev)
-            spec = None
-        else:
-            spec = dest_spec
+        spec = try_get_spec(destdir, got_sha, spec)
 
     return got_sha, dest_tar_gz, spec
+
+def try_get_spec(destdir, got_sha, spec):
+    dest_spec = "%s/%s" % (destdir, os.basename(spec))
+    spec_rev = '%s:%s' % (got_sha, spec)
+    with open(dest_spec, "w") as specf:
+        rc = utils.unchecked_call(['git', 'show', spec_rev], stdout=specf)
+    if rc:
+        log.debug("No spec file found under %s" % spec_rev)
+        return None
+    else:
+        return dest_spec
 
 def check_git_hash(url, tag, sha, got_sha, nocheck):
     efmt = "Hash mismatch for %s tag %s\n    expected: %s\n    actual:   %s"
