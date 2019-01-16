@@ -44,7 +44,7 @@ def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
     hash_ = kw.get('hash') if nocheck else _get_required_attr(kw, 'hash', line)
     spec = want_spec and kw.get('spec', "rpm/%s.spec" % name)
 
-    run_with_tmp_git_dir(lambda:
+    return run_with_tmp_git_dir(lambda:
         git_archive_remote_ref(destdir, nocheck, url, tag, name, hash_, spec))
 
 # no git dir stack version
