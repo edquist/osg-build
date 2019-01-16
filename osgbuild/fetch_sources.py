@@ -47,33 +47,22 @@ def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
     return run_with_tmp_git_dir(destdir, lambda:
         git_archive_remote_ref(destdir, nocheck, url, tag, name, hash_, spec))
 
-# no git dir stack version
 def run_with_tmp_git_dir(destdir, call):
     git_dir = tempfile.mkdtemp(dir=destdir)
-    os.putenv('GIT_DIR', git_dir)
+    old_git_dir = update_env('GIT_DIR', git_dir)
     try:
         return call()
     finally:
         shutil.rmtree(git_dir)
-        os.unsetenv('GIT_DIR')
+        update_env('GIT_DIR', old_git_dir)
 
-## git dir stack version
-#def run_with_tmp_git_dir(call)
-#    git_dir = tempfile.mkdtemp(dir=destdir)
-#    old_git_dir = update_env('GIT_DIR', git_dir)
-#    try:
-#        return call()
-#    finally:
-#        shutil.rmtree(git_dir)
-#        update_env('GIT_DIR', old_git_dir)
-#
-#def update_env(key, value):
-#    oldval = os.getenv(key)
-#    if value is None:
-#        os.unsetenv(key)
-#    else:
-#        os.putenv(key, value)
-#    return oldval
+def update_env(key, val):
+    oldval = os.environ.get(key)
+    if val is None:
+        del os.environ[key]
+    else:
+        os.environ[key] = val
+    return oldval
 
 def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
     utils.checked_call(['git', 'init', '--bare'])
