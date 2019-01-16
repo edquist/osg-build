@@ -93,8 +93,8 @@ def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
 
     if spec:
         dest_spec = "%s/%s" % (destdir, os.basename(spec))
+        spec_rev = '%s:%s' % (got_sha, spec)
         with open(dest_spec, "w") as spec_out:
-            spec_rev = '%s:%s' % (got_sha, spec)
             # XXX: unchecked to allow non-existing spec?
             utils.checked_call(['git', 'show', spec_rev], stdout=spec_out)
 
