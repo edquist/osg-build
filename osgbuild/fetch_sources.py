@@ -92,7 +92,7 @@ def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
         utils.checked_pipeline(git_archive_cmd, gzip_cmd, stdout=destf)
 
     if spec:
-        dest_spec = "%s/%s.tar" % (destdir, os.basename(spec))
+        dest_spec = "%s/%s" % (destdir, os.basename(spec))
         with open(dest_spec, "w") as spec_out:
             spec_rev = '%s:%s' % (got_sha, spec)
             # XXX: unchecked to allow non-existing spec?
