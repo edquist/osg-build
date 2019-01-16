@@ -95,8 +95,12 @@ def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
         dest_spec = "%s/%s" % (destdir, os.basename(spec))
         spec_rev = '%s:%s' % (got_sha, spec)
         with open(dest_spec, "w") as specf:
-            # XXX: unchecked to allow non-existing spec?
-            utils.checked_call(['git', 'show', spec_rev], stdout=specf)
+            rc = utils.unchecked_call(['git', 'show', spec_rev], stdout=specf)
+        if rc:
+            log.debug("No spec file found under %s" % spec_rev)
+            spec = None
+        else:
+            spec = dest_spec
 
     return got_sha, dest_tar_gz, spec
 
