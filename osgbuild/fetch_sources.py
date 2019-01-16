@@ -143,6 +143,7 @@ def parse_meta_url(line, nocheck):
 
     # now can use this for ALL source lines... mmm...
 
+    return args, kv
 
 
 def process_meta_url(line, destdir, nocheck):
