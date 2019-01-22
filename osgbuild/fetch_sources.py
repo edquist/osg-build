@@ -53,7 +53,7 @@ def _mk_prefix(name, tag, tarball):
         prefix = "%s-%s" % (name, tarball_version)
     return prefix
 
-def fetch_github_source(repo, tag, hash=None, ops=ops, **kw):
+def fetch_github_source(repo, tag, hash=None, ops=None, **kw):
     m = re.match(r"([^\s/]+)/([^\s/]+?)(?:.git)?$", repo)
     if not m:
         raise Error("Repo syntax must be owner/project: %s" % ops.line)
