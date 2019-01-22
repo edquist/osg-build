@@ -13,6 +13,7 @@ import re
 import os
 import tempfile
 import shutil
+import subprocess
 import sys
 try:
     from six.moves import urllib
@@ -126,6 +127,75 @@ def check_git_hash(url, tag, sha, got_sha, nocheck):
         else:
             raise Error(msg)
 
+
+def chunked_read(handle, size):
+    chunk = handle.read(size)
+    while chunk:
+        yield chunk
+        chunk = handle.read(size)
+
+def download_uri(uri, output_path):
+    log.info('Retrieving ' + uri)
+    try:
+        handle = urllib.request.urlopen(uri)
+    except urllib.error.URLError as err:
+        raise Error("Unable to download %s\n%s" % (uri, err))
+
+    try:
+        with open(output_path, 'wb') as desthandle:
+            for chunk in chunked_read(handle, 64 * 1024):
+                desthandle.write(chunk)
+    except EnvironmentError as err:
+        raise Error("Unable to save downloaded file to %s\n%s" % (output_path, err))
+
+
+def fetch_cached_source(kw, destdir, cache_prefix, relpath, nocheck=False, line=''):
+    uri = os.path.join(cache_prefix, relpath)
+    return fetch_uri_source(kw, destdir, uri, nocheck, line)
+
+
+def fetch_uri_source(kw, destdir, uri, nocheck=False, line=''):
+    # TODO: handle different checksum types HERE
+    sha1sum = kw.get('sha1sum') #if nocheck else _get_required_attr(kw, 'sha1sum', line)
+
+    # NOTE: does not respect Content-Disposition
+    outfile = os.path.join(destdir, os.path.basename(uri))
+
+    download_uri(uri, outfile)
+
+    if sha1sum: # or not nocheck:
+        check_file_checksum(outfile, sha1sum, nocheck)
+
+    return outfile
+
+
+def check_file_checksum(path, sha1sum, nocheck):
+    efmt = "sha1sum mismatch for '%s':\n    expected: %s\n    got:   %s"
+    got_sha1sum = sha1sum_file(path)
+    if sha1sum != got_sha1sum:
+        msg = efmt % (path, sha1sum, got_sha1sum)
+        if nocheck:
+            log.warning(msg + "\n    (ignored)")
+        else:
+            raise Error(msg)
+
+
+def sha1sum_file(path):
+    return checksum_file(path, "sha1sum")
+
+_checksum_len_by_type = dict(md5sum=32, sha1sum=40, sha256sum=64, sha512sum=128)
+_checksum_type_by_len = dict( (v,k) for k,v in _checksum_len_by_type.items() )
+
+def checksum_file(path, checksum_type):
+    checksum_len = _checksum_len_by_type[checksum_type]
+    output = subprocess.check_output(checksum_type, stdin=open(path))
+    m = re.match(r'([0-9a-f]{%d}) ' % checksum_len, output)
+    if not m:
+        print("output was: %s" % output)
+        raise RuntimeError("got garbage output back from '%d'" % checksum_type)
+    return m.group(1)
+
+
 def parse_meta_url(line, nocheck):
     """
     fields:
@@ -173,6 +243,8 @@ def process_meta_url(line, destdir, nocheck, want_spec=True):
     handlers = dict(
         git    = fetch_git_source,
         github = fetch_github_source,
+        cached = fetch_cached_source,
+        uri    = fetch_uri_source,
     )
     meta_type = kv.get('type')
     if meta_type in handlers:
