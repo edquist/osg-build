@@ -6,6 +6,7 @@ the osg/ dir in the package.
 # pylint: disable=W0614
 from __future__ import absolute_import
 from __future__ import print_function
+import collections
 import fnmatch
 import logging
 import glob
@@ -149,13 +150,10 @@ def download_uri(uri, output_path):
         raise Error("Unable to save downloaded file to %s\n%s" % (output_path, err))
 
 
-# or named tuple
-class FetchOptions:
-    destdir = None
-    cache_prefix = None
-    nocheck = None
-    want_spec = False
-    line = ''  # already parsed, only used for logging
+# common fetch options not found in .source line
+FetchOptions = collections.namedtuple(
+    'destdir', 'cache_prefix', 'nocheck', 'want_spec', 'line'
+)
 
 #                      (kv, destdir, nocheck, want_spec, line)
 def fetch_cached_source(kw, destdir, cache_prefix, nocheck=False, line=''):
