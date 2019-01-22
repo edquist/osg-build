@@ -77,16 +77,15 @@ def fetch_github_source(kw, destdir='.', nocheck=False, want_spec=False,
 def nvl(arg, default):
     return default if arg is None else arg
 
-def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
-    url = _get_required_attr(kw, 'url', line)
-    tag = _get_required_attr(kw, 'tag', line)
-    name = kw.get('name') or re.sub(r'\.git$', '', os.path.basename(url))
-    hash_ = kw.get('hash') if nocheck else _get_required_attr(kw, 'hash', line)
-    spec = want_spec and kw.get('spec', "rpm/%s.spec" % name)
-    prefix = _mk_prefix(name, tag, kw.get('tarball'))
+def fetch_git_source(url, tag, hash=None, ops=None,
+        name=None, spec=None, tarball=None, **kw)
+    name = name or re.sub(r'\.git$', '', os.path.basename(url))
+    ops.nocheck or _required(hash, 'hash', ops.line)
+    spec = ops.want_spec and nvl(spec, "rpm/%s.spec" % name)
+    prefix = _mk_prefix(name, tag, tarball)
 
-    return run_with_tmp_git_dir(destdir, lambda:
-        git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec))
+    return run_with_tmp_git_dir(ops.destdir, lambda:
+        git_archive_remote_ref(url, tag, hash, prefix, spec, ops))
 
 def run_with_tmp_git_dir(destdir, call):
     git_dir = tempfile.mkdtemp(dir=destdir)
@@ -105,15 +104,15 @@ def update_env(key, val):
         os.environ[key] = val
     return oldval
 
-def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
+def git_archive_remote_ref(url, tag, hash, prefix, spec, ops):
     utils.checked_call(['git', 'init', '--bare'])
     utils.checked_call(['git', 'remote', 'add', 'origin', url])
     utils.checked_call(['git', 'fetch', '--depth=1', 'origin', tag])
     got_sha = utils.checked_backtick(['git', 'rev-parse', 'FETCH_HEAD'])
-    if hash_ or not nocheck:
-        check_git_hash(url, tag, hash_, got_sha, nocheck)
+    if hash or not ops.nocheck:
+        check_git_hash(url, tag, hash, got_sha, ops.nocheck)
 
-    dest_tar_gz = "%s/%s.tar.gz" % (destdir, prefix)
+    dest_tar_gz = "%s/%s.tar.gz" % (ops.destdir, prefix)
     git_archive_cmd = ['git', 'archive', '--format=tar',
                                          '--prefix=%s/' % prefix, got_sha]
     gzip_cmd = ['gzip', '-n']
@@ -122,7 +121,7 @@ def git_archive_remote_ref(destdir, nocheck, url, tag, hash_, prefix, spec):
         utils.checked_pipeline(git_archive_cmd, gzip_cmd, stdout=destf)
 
     if spec:
-        spec = try_get_spec(destdir, got_sha, spec)
+        spec = try_get_spec(ops.destdir, got_sha, spec)
 
     return got_sha, dest_tar_gz, spec
 
