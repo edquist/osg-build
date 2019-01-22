@@ -240,7 +240,6 @@ def parse_meta_url(line):
     args = [ a[0] for a in filter((lambda t: len(t) == 1), kv) ]
     kv = dict( filter((lambda t: len(t) == 2), kv) )
 
-    len(args) <= 2 # OR ELSE
     # AUTO-URI [CHECKSUM]
     #
     # AUTO-URI:
