@@ -39,6 +39,10 @@ def _get_required_attr(kw, key, line):
         raise Error("No %s specified for line: %s" % (key, line))
     return kw[key]
 
+def _required(item, key, line):
+    if item is None:
+        raise Error("No %s specified for line: %s" % (key, line))
+
 def _mk_prefix(name, tag, tarball):
     if tarball:
         if not tarball.endswith('.tar.gz'):
