@@ -176,18 +176,16 @@ def fetch_cached_source(kw, destdir, cache_prefix, nocheck=False, line=''):
     return fetch_uri_source(kw, destdir, uri, nocheck, line)
 
 
-#                   (kv, destdir, nocheck, want_spec, line)
-def fetch_uri_source(kw, destdir, uri, nocheck=False, line=''):
+def fetch_uri_source(uri, sha1sum=None, ops=None):  #, **kw)
     # TODO: handle different checksum types HERE
-    sha1sum = kw.get('sha1sum') #if nocheck else _get_required_attr(kw, 'sha1sum', line)
 
     # NOTE: does not respect Content-Disposition
-    outfile = os.path.join(destdir, os.path.basename(uri))
+    outfile = os.path.join(ops.destdir, os.path.basename(uri))
 
     download_uri(uri, outfile)
 
-    if sha1sum: # or not nocheck:
-        check_file_checksum(outfile, sha1sum, nocheck)
+    if sha1sum: # or not ops.nocheck:
+        check_file_checksum(outfile, sha1sum, ops.nocheck)
 
     return outfile
 
