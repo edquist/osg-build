@@ -196,7 +196,7 @@ def checksum_file(path, checksum_type):
     return m.group(1)
 
 
-def parse_meta_url(line, nocheck):
+def parse_meta_url(line):
     """
     fields:
         type={git|github|vdt-upstream|uri}
@@ -238,7 +238,7 @@ def process_meta_url(line, destdir, nocheck, want_spec=True):
     If nocheck is True, hashes do not have to match.
     """
 
-    a,kv = parse_meta_url(line, nocheck)
+    a,kv = parse_meta_url(line)
 
     handlers = dict(
         git    = fetch_git_source,
