@@ -68,7 +68,7 @@ def fetch_github_source(repo, tag, hash=None, ops=None, **kw):
 #       ops=None,  # marks end of positional (unnamed) args allowed
 #                  # (another positional arg here will raise an exception)
 #       optional_named_arg=None, ...,
-#       **kw  # this maybe should not be listed, or should ensure empty
+#       **kw  # only list if extra args are intended (to pass to another fn)
 #       )
 
 def nvl(arg, default):
