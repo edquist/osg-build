@@ -171,7 +171,7 @@ FetchOptions = collections.namedtuple('FetchOptions',
 
 
 def fetch_cached_source(relpath, sha1sum=None, ops=None):  #, **kw)
-    uri = os.path.join(cache_prefix, relpath)
+    uri = os.path.join(ops.cache_prefix, relpath)
     return fetch_uri_source(uri, sha1sum, ops=ops) #, **kw)
 
 
