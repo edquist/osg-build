@@ -169,11 +169,10 @@ FetchOptions = collections.namedtuple('FetchOptions',
     ['destdir', 'cache_prefix', 'nocheck', 'want_spec', 'line']
 )
 
-#                      (kv, destdir, nocheck, want_spec, line)
-def fetch_cached_source(kw, destdir, cache_prefix, nocheck=False, line=''):
-    relpath = _get_required_attr(kw, 'relpath', line)
+
+def fetch_cached_source(relpath, sha1sum=None, ops=None):  #, **kw)
     uri = os.path.join(cache_prefix, relpath)
-    return fetch_uri_source(kw, destdir, uri, nocheck, line)
+    return fetch_uri_source(uri, sha1sum, ops=ops) #, **kw)
 
 
 def fetch_uri_source(uri, sha1sum=None, ops=None):  #, **kw)
