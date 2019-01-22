@@ -149,12 +149,22 @@ def download_uri(uri, output_path):
         raise Error("Unable to save downloaded file to %s\n%s" % (output_path, err))
 
 
+# or named tuple
+class FetchOptions:
+    destdir = None
+    cache_prefix = None
+    nocheck = None
+    want_spec = False
+    line = ''  # already parsed, only used for logging
+
+#                      (kv, destdir, nocheck, want_spec, line)
 def fetch_cached_source(kw, destdir, cache_prefix, nocheck=False, line=''):
     relpath = _get_required_attr(kw, 'relpath', line)
     uri = os.path.join(cache_prefix, relpath)
     return fetch_uri_source(kw, destdir, uri, nocheck, line)
 
 
+#                   (kv, destdir, nocheck, want_spec, line)
 def fetch_uri_source(kw, destdir, uri, nocheck=False, line=''):
     # TODO: handle different checksum types HERE
     sha1sum = kw.get('sha1sum') #if nocheck else _get_required_attr(kw, 'sha1sum', line)
