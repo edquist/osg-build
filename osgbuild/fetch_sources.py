@@ -34,11 +34,6 @@ else:
     logging.basicConfig(format="%(message)s", level=logging.INFO)
 
 
-def _get_required_attr(kw, key, line):
-    if key not in kw:
-        raise Error("No %s specified for line: %s" % (key, line))
-    return kw[key]
-
 def _required(item, key, line):
     if item is None:
         raise Error("No %s specified for line: %s" % (key, line))
