@@ -230,7 +230,19 @@ def parse_meta_url(line):
     args = [ a[0] for a in filter((lambda t: len(t) == 1), kv) ]
     kv = dict( filter((lambda t: len(t) == 2), kv) )
 
-    len(args) <= 1 # OR ELSE
+    len(args) <= 2 # OR ELSE
+    # AUTO-URI [CHECKSUM]
+    #
+    # AUTO-URI:
+    #
+    # /path/to...          -> file:// uri
+    # owner/repo.git       -> github (*)
+    # path/to/file.ext     -> cached
+    # proto://.../repo.git -> git (*)
+    # proto://...          -> uri
+
+    # (*) but note other items are required for git
+    #     maybe: "OWNER/REPO.git TAG COMMIT_HASH" at a minimum
 
     # now can use this for ALL source lines... mmm...
 
