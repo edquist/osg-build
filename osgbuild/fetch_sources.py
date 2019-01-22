@@ -59,6 +59,17 @@ def fetch_github_source(kw, destdir='.', nocheck=False, want_spec=False,
     newkw = dict(kw, url=url)
     return fetch_git_source(newkw, destdir, nocheck, want_spec, line)
 
+# fetch handlers should be defined like:
+#
+#   fetch_xyz_source(
+#       required_named_or_positional_arg, ...,
+#       optional_named_or_positional_arg=None, ...,
+#       ops=None,  # marks end of positional (unnamed) args allowed
+#                  # (another positional arg here will raise an exception)
+#       optional_named_arg=None, ...,
+#       **kw  # this maybe should not be listed, or should ensure empty
+#       )
+
 def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
     url = _get_required_attr(kw, 'url', line)
     tag = _get_required_attr(kw, 'tag', line)
