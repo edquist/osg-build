@@ -149,7 +149,8 @@ def download_uri(uri, output_path):
         raise Error("Unable to save downloaded file to %s\n%s" % (output_path, err))
 
 
-def fetch_cached_source(kw, destdir, cache_prefix, relpath, nocheck=False, line=''):
+def fetch_cached_source(kw, destdir, cache_prefix, nocheck=False, line=''):
+    relpath = _get_required_attr(kw, 'relpath', line)
     uri = os.path.join(cache_prefix, relpath)
     return fetch_uri_source(kw, destdir, uri, nocheck, line)
 
