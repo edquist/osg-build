@@ -53,15 +53,12 @@ def _mk_prefix(name, tag, tarball):
         prefix = "%s-%s" % (name, tarball_version)
     return prefix
 
-def fetch_github_source(kw, destdir='.', nocheck=False, want_spec=False,
-                        line=''):
-    repo = _get_required_attr(kw, 'repo', line)
+def fetch_github_source(repo, tag, hash=None, ops=ops, **kw):
     m = re.match(r"([^\s/]+)/([^\s/]+?)(?:.git)?$", repo)
     if not m:
-        raise Error("Repo syntax must be owner/project: %s" % line)
+        raise Error("Repo syntax must be owner/project: %s" % ops.line)
     url = "https://github.com/" + repo
-    newkw = dict(kw, url=url)
-    return fetch_git_source(newkw, destdir, nocheck, want_spec, line)
+    return fetch_git_source(url, tag, hash, ops=ops, **kw)
 
 # fetch handlers should be defined like:
 #
