@@ -78,7 +78,7 @@ def nvl(arg, default):
     return default if arg is None else arg
 
 def fetch_git_source(url, tag, hash=None, ops=None,
-        name=None, spec=None, tarball=None, **kw)
+        name=None, spec=None, tarball=None, **kw):
     name = name or re.sub(r'\.git$', '', os.path.basename(url))
     ops.nocheck or _required(hash, 'hash', ops.line)
     spec = ops.want_spec and nvl(spec, "rpm/%s.spec" % name)
