@@ -161,7 +161,8 @@ def download_uri(uri, output_path):
             for chunk in chunked_read(handle, 64 * 1024):
                 desthandle.write(chunk)
     except EnvironmentError as err:
-        raise Error("Unable to save downloaded file to %s\n%s" % (output_path, err))
+        raise Error("Unable to save downloaded file to %s\n%s"
+                                           % (output_path, err))
 
 
 # common fetch options not found in .source line
