@@ -168,8 +168,8 @@ def download_uri(uri, output_path):
 
 
 # common fetch options not found in .source line
-FetchOptions = collections.namedtuple(
-    'destdir', 'cache_prefix', 'nocheck', 'want_spec', 'line'
+FetchOptions = collections.namedtuple('FetchOptions',
+    ['destdir', 'cache_prefix', 'nocheck', 'want_spec', 'line']
 )
 
 #                      (kv, destdir, nocheck, want_spec, line)
