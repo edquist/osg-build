@@ -74,6 +74,9 @@ def fetch_github_source(kw, destdir='.', nocheck=False, want_spec=False,
 #       **kw  # this maybe should not be listed, or should ensure empty
 #       )
 
+def nvl(arg, default):
+    return default if arg is None else arg
+
 def fetch_git_source(kw, destdir='.', nocheck=False, want_spec=False, line=''):
     url = _get_required_attr(kw, 'url', line)
     tag = _get_required_attr(kw, 'tag', line)
