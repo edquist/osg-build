@@ -258,6 +258,18 @@ def parse_meta_url(line):
     return args, kv
 
 
+def get_auto_uri_type(auto_uri, *optional, **kw):
+    def matches(pat):
+        return re.search(pat, auto_uri)
+
+    if matches(r'^\w+://'):
+        return 'git' if matches(r'\.git$') else 'uri'
+    elif matches(r'^/'):
+        return 'uri'
+    else:
+        return 'github' if matches(r'\.git$') else 'cached'
+
+
 def process_meta_url(line, destdir, nocheck, want_spec=True):
     """
     Process a serialized URL spec.  Should be of the format:
@@ -282,12 +294,16 @@ def process_meta_url(line, destdir, nocheck, want_spec=True):
         cached = fetch_cached_source,
         uri    = fetch_uri_source,
     )
-    meta_type = kv.get('type')
+    meta_type = kv.get('type') or get_auto_uri_type(*args, **kv)
     if meta_type in handlers:
         fetch_source = handlers[meta_type]
         sha, tar_gz, spec = fetch_source(*args, ops=ops, **kv)
         files = list(filter(None, (tar_gz, spec)))
         return files
+    else:
+        raise Error("Unrecognized type '%s' in line: %s" % (meta_type, line))
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     contents = {}
     for entry in line.split():
