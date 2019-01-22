@@ -70,7 +70,7 @@ def nvl(arg, default):
     return default if arg is None else arg
 
 def fetch_git_source(url, tag, hash=None, ops=None,
-        name=None, spec=None, tarball=None, **kw):
+        name=None, spec=None, tarball=None):
     name = name or re.sub(r'\.git$', '', os.path.basename(url))
     ops.nocheck or _required(hash, 'hash', ops.line)
     spec = ops.want_spec and nvl(spec, "rpm/%s.spec" % name)
@@ -166,12 +166,12 @@ FetchOptions = collections.namedtuple('FetchOptions',
 )
 
 
-def fetch_cached_source(relpath, sha1sum=None, ops=None):  #, **kw)
+def fetch_cached_source(relpath, sha1sum=None, ops=None):
     uri = os.path.join(ops.cache_prefix, relpath)
-    return fetch_uri_source(uri, sha1sum, ops=ops) #, **kw)
+    return fetch_uri_source(uri, sha1sum, ops=ops)
 
 
-def fetch_uri_source(uri, sha1sum=None, ops=None):  #, **kw)
+def fetch_uri_source(uri, sha1sum=None, ops=None):
     # TODO: handle different checksum types HERE
 
     # NOTE: does not respect Content-Disposition
