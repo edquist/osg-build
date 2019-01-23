@@ -171,15 +171,14 @@ def fetch_cached_source(relpath, sha1sum=None, ops=None):
     return fetch_uri_source(uri, sha1sum, ops=ops)
 
 
-def fetch_uri_source(uri, sha1sum=None, ops=None):
+def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
     # TODO: handle different checksum types HERE
 
     if uri.startswith('/'):
         uri = "file://" + uri
         log.warning("Absolute path names in .source files break the 4th wall")
 
-    # NOTE: does not respect Content-Disposition
-    outfile = os.path.join(ops.destdir, os.path.basename(uri))
+    outfile = os.path.join(ops.destdir, os.path.basename(filename or uri))
 
     download_uri(uri, outfile)
 
