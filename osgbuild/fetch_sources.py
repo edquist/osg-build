@@ -55,17 +55,6 @@ def fetch_github_source(repo, tag, hash=None, ops=None, **kw):
     url = "https://github.com/" + repo
     return fetch_git_source(url, tag, hash, ops=ops, **kw)
 
-# fetch handlers should be defined like:
-#
-#   fetch_xyz_source(
-#       required_named_or_positional_arg, ...,
-#       optional_named_or_positional_arg=None, ...,
-#       ops=None,  # marks end of positional (unnamed) args allowed
-#                  # (another positional arg here will raise an exception)
-#       optional_named_arg=None, ...,
-#       **kw  # only list if extra args are intended (to pass to another fn)
-#       )
-
 def nvl(arg, default):
     return default if arg is None else arg
 
@@ -137,7 +126,6 @@ def check_git_hash(url, tag, sha, got_sha, nocheck):
         else:
             raise Error(msg)
 
-
 def chunked_read(handle, size):
     chunk = handle.read(size)
     while chunk:
@@ -157,14 +145,12 @@ def download_uri(uri, output_path):
                 desthandle.write(chunk)
     except EnvironmentError as err:
         raise Error("Unable to save downloaded file to %s\n%s"
-                                           % (output_path, err))
 
 
 # common fetch options not found in .source line
 FetchOptions = collections.namedtuple('FetchOptions',
     ['destdir', 'cache_prefix', 'nocheck', 'want_spec', 'line']
 )
-
 
 def fetch_cached_source(relpath, sha1sum=None, ops=None):
     uri = os.path.join(ops.cache_prefix, relpath)
@@ -184,7 +170,6 @@ def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
 
     return outfile
 
-
 def check_file_checksum(path, sha1sum, nocheck):
     efmt = "sha1sum mismatch for '%s':\n    expected: %s\n    got:   %s"
     got_sha1sum = sha1sum_file(path)
@@ -194,7 +179,6 @@ def check_file_checksum(path, sha1sum, nocheck):
             log.warning(msg + "\n    (ignored)")
         else:
             raise Error(msg)
-
 
 def sha1sum_file(path):
     return checksum_file(path, "sha1sum")
@@ -211,32 +195,12 @@ def checksum_file(path, checksum_type):
         raise RuntimeError("got garbage output back from '%d'" % checksum_type)
     return m.group(1)
 
-
 def parse_meta_url(line):
-    """
-    fields:
-        type={git|github|vdt-upstream|uri}
-        repo=owner/reponame  # type=github only
-        path=name/version/filename  # vdt-upstream only
-        # url for uri type
-        # filename for uri type (might not match uri suffix)
-        # auto filename for uri type respecting content-disposition
-        sha1sum=file_checksum  # mainly for non-git, but can use for git also
-        # or checksum=file_checksum checksum_type=sha1sum, etc,
-        # which we might use internally anyway
-        url=git_clone_url
-        name=tarball_package_name
-        tag=refname
-        hash=commit_sha1
-        spec=rpm/NAME.spec
-    """
-
     kv = [ entry.split("=", 1) for entry in line.split() ]
     args = [ a[0] for a in filter((lambda t: len(t) == 1), kv) ]
     kv = dict( filter((lambda t: len(t) == 2), kv) )
 
     return args, kv
-
 
 def get_auto_uri_type(auto_uri, *optional, **kw):
     # /path/to...          -> file:// uri

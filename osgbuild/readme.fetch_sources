@@ -1,0 +1,34 @@
+TODO: clean this up
+
+---
+
+# fetch handlers should be defined like:
+#
+#   fetch_xyz_source(
+#       required_named_or_positional_arg, ...,
+#       optional_named_or_positional_arg=None, ...,
+#       ops=None,  # marks end of positional (unnamed) args allowed
+#                  # (another positional arg here will raise an exception)
+#       optional_named_arg=None, ...,
+#       **kw  # only list if extra args are intended (to pass to another fn)
+#       )
+
+---
+
+meta-url fields:
+
+        type={git|github|vdt-upstream|uri}
+        repo=owner/reponame  # type=github only
+        path=name/version/filename  # vdt-upstream only
+        # url for uri type
+        # filename for uri type (might not match uri suffix)
+        # auto filename for uri type respecting content-disposition
+        sha1sum=file_checksum  # mainly for non-git, but can use for git also
+        # or checksum=file_checksum checksum_type=sha1sum, etc,
+        # which we might use internally anyway
+        url=git_clone_url
+        name=tarball_package_name
+        tag=refname
+        hash=commit_sha1
+        spec=rpm/NAME.spec
+
