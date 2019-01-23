@@ -440,13 +440,13 @@ def process_dot_source(cache_prefix, sfilename, destdir, nocheck):
     """
 
     ops = FetchOptions(destdir=destdir, cache_prefix=cache_prefix,
-                       nocheck=nocheck, want_spec=want_spec, line='')
+                       nocheck=nocheck, want_spec=True, line='')
 
     utils.safe_makedirs(destdir)
     filenames = []
     with open(sfilename, 'r') as sfile:
         for line in sfile:
-            line = re.sub(r'(^|\s)#.*', '').strip()
+            line = re.sub(r'(^|\s)#.*', '', line).strip()
             if line:
                 filenames += process_meta_url(line, ops)
 
