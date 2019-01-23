@@ -269,7 +269,7 @@ def get_auto_uri_type(auto_uri, *optional, **kw):
         return 'github' if matches(r'\.git$') else 'cached'
 
 
-def process_meta_url(line, destdir, nocheck, want_spec=True):
+def process_meta_url(line, ops):
     """
     Process a serialized URL spec.  Should be of the format:
      type=git url=https://github.com/opensciencegrid/cvmfs-config-osg.git name=cvmfs-config-osg tag=0.1 hash=e2b54cd1b94c9e3eaee079490c9d85f193c52249
@@ -282,10 +282,7 @@ def process_meta_url(line, destdir, nocheck, want_spec=True):
     """
 
     args,kv = parse_meta_url(line)
-
-    # TODO: get cache_prefix properly
-    ops = FetchOptions(destdir=destdir, cache_prefix=C.WEB_CACHE_PREFIX,
-                       nocheck=nocheck, want_spec=want_spec, line=line)
+    ops = ops._replace(line=line)
 
     handlers = dict(
         git    = fetch_git_source,
@@ -441,46 +438,19 @@ def process_dot_source(cache_prefix, sfilename, destdir, nocheck):
     cache.
 
     """
+
+    ops = FetchOptions(destdir=destdir, cache_prefix=cache_prefix,
+                       nocheck=nocheck, want_spec=want_spec, line='')
+
     utils.safe_makedirs(destdir)
-    downloaded = []
+    filenames = []
     with open(sfilename, 'r') as sfile:
-        for lineno, line in enumerate(sfile):
-            line = line.strip()
-            if line.startswith('#'):
-                continue
-            if line == '':
-                continue
-            if len(line.split()) > 1:
-                filenames = process_meta_url(line, destdir, nocheck)
-                downloaded.extend(filenames)
-                continue
-            elif line.startswith('/'):
-                uri = "file://" + line
-                log.warning(
-                    "An absolute path has been given in %s line %d. "
-                    "It is recommended to use only paths relative to %s"
-                    "in your source files.", sfilename, lineno+1,
-                    cache_prefix)
-            elif not re.match(r'/|\w+://', line): # relative path
-                uri = os.path.join(cache_prefix, line)
-            else:
-                uri = line
+        for line in sfile:
+            line = re.sub(r'(^|\s)#.*', '').strip()
+            if line:
+                filenames += process_meta_url(line, ops)
 
-            log.info('Retrieving ' + uri)
-            try:
-                handle = urllib.request.urlopen(uri)
-            except urllib.error.URLError as err:
-                raise Error("Unable to download %s\n%s" % (uri, str(err)))
-            filename = os.path.join(destdir, os.path.basename(line))
-            try:
-                with open(filename, 'wb') as desthandle:
-                    desthandle.write(handle.read())
-            except EnvironmentError as err:
-                raise Error("Unable to save downloaded file to %s\n%s" % (filename, str(err)))
-            downloaded.append(filename)
-
-    return downloaded
-# end of process_dot_source()
+    return filenames
 
 
 def full_extract(unpacked_dir, archives_downloaded, destdir):
