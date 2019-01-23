@@ -239,25 +239,16 @@ def parse_meta_url(line):
     args = [ a[0] for a in filter((lambda t: len(t) == 1), kv) ]
     kv = dict( filter((lambda t: len(t) == 2), kv) )
 
-    # AUTO-URI [CHECKSUM]
-    #
-    # AUTO-URI:
-    #
-    # /path/to...          -> file:// uri
-    # owner/repo.git       -> github (*)
-    # path/to/file.ext     -> cached
-    # proto://.../repo.git -> git (*)
-    # proto://...          -> uri
-
-    # (*) but note other items are required for git
-    #     maybe: "OWNER/REPO.git TAG COMMIT_HASH" at a minimum
-
-    # now can use this for ALL source lines... mmm...
-
     return args, kv
 
 
 def get_auto_uri_type(auto_uri, *optional, **kw):
+    # /path/to...          -> file:// uri
+    # owner/repo.git       -> github (TAG also required)
+    # path/to/file.ext     -> cached
+    # proto://.../repo.git -> git (TAG also required)
+    # proto://...          -> uri
+
     def matches(pat):
         return re.search(pat, auto_uri)
 
