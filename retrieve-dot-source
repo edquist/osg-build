@@ -2,10 +2,9 @@
 
 import getopt
 import sys
+import os
 
-from osgbuild import fetch_sources
-
-C = fetch_sources.C
+from osgbuild.fetch_sources import C, process_dot_source
 
 def usage():
     print("Usage: {script} [-d destdir] [-n] [-s] upstream.source [...]\n\n"
