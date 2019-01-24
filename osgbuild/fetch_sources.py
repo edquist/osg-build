@@ -267,8 +267,8 @@ def process_meta_url(line, ops):
         files = list(filter(None, (tar_gz, spec)))
         return files
     else:
-        raise Error("Unrecognized type '%s'" % meta_type)
-
+        raise Error("Unrecognized type '%s' (valid types are: %s)"
+                    % (meta_type, sorted(handlers)))
 
 def deref_git_sha(sha):
     output, rc = utils.sbacktick(["git", "rev-parse", sha + "^{}"])
