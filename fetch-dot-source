@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from __future__ import print_function
 import getopt
 import sys
 import os
@@ -7,6 +8,7 @@ import os
 import osgbuild.main  # import needed for logging
 
 from osgbuild.fetch_sources import C, process_dot_source
+from osgbuild.error import Error
 
 def usage():
     print("Usage: {script} [-d destdir] [-n] [-s] upstream.source [...]\n\n"
@@ -37,8 +39,30 @@ for op,val in ops:
     elif op == '-s': options['want_spec'] = True
     elif op == '-d': options['destdir'] = val
 
-for src in dot_sources:
-    files = process_dot_source(sfilename=src, **options)
-    for f in files:
-        print(f)
+def main():
+    for src in dot_sources:
+        files = process_dot_source(sfilename=src, **options)
+        for f in files:
+            print(f)
+
+try:
+    main()
+except SystemExit as err:
+    raise
+except KeyboardInterrupt:
+    print("-" * 79, file=sys.stderr)
+    print("Interrupted", file=sys.stderr)
+    print("-" * 79, file=sys.stderr)
+    sys.exit(3)
+except Error as err:
+    print("-" * 79, file=sys.stderr)
+    print(err, file=sys.stderr)
+    print("-" * 79, file=sys.stderr)
+    sys.exit(4)
+except Exception as err:
+    print("-" * 79, file=sys.stderr)
+    print("Unhandled exception:", file=sys.stderr)
+    print(err, file=sys.stderr)
+    print("-" * 79, file=sys.stderr)
+    sys.exit(1)
 
