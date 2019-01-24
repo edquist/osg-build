@@ -270,11 +270,10 @@ def process_dot_source(cache_prefix, sfilename, destdir, nocheck):
 
     utils.safe_makedirs(destdir)
     filenames = []
-    with open(sfilename, 'r') as sfile:
-        for line in sfile:
-            line = re.sub(r'(^|\s)#.*', '', line).strip()
-            if line:
-                filenames += process_meta_url(line, ops)
+    for line in open(sfilename):
+        line = re.sub(r'(^|\s)#.*', '', line).strip()
+        if line:
+            filenames += process_meta_url(line, ops)
 
     return filenames
 
