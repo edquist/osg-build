@@ -145,6 +145,7 @@ def download_uri(uri, output_path):
                 desthandle.write(chunk)
     except EnvironmentError as err:
         raise Error("Unable to save downloaded file to %s\n%s"
+                                           % (output_path, err))
 
 
 # common fetch options not found in .source line
