@@ -195,7 +195,7 @@ def kvmatch(arg):
 
 def parse_meta_url(line):
     kv, args = dual_filter((lambda t: t[0]), map(kvmatch, line.split()))
-    return list(zip(*args))[1], dict(kv)
+    return [ a[1] for a in args ], dict(kv)
 
 def get_auto_uri_type(*args, **kw):
     if not args:
