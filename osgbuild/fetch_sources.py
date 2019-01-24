@@ -218,19 +218,20 @@ def process_meta_url(line, ops):
     """
     Process URL spec: [args...] [field=value...]
 
-    fields:
-      type: {git|github|uri|cached}
-      url:  git clone url (type=git)
-      name: repo name if different from url basename (type=git, optional)
-      tag:  git tag or ref to archive (type=git/github)
-      hash: git commit hash (type=git/github, optional if nocheck=True)
-      repo: owner/repo (type=github)
-      tarball: archive name if not name-tag.tar.gz (type=git/github, optional)
-      spec: path rpm spec, if not rpm/name.spec (type=git/github, optional)
-      uri:  uri for file to download (type=uri)
+    fields names:
+
+      type:     {git|github|uri|cached}
+      url:      git clone url (type=git)
+      name:     repo name if different from url basename (type=git, optional)
+      tag:      git tag or ref to archive (type=git/github)
+      hash:     git commit hash (type=git/github, optional if nocheck=True)
+      repo:     owner/repo (type=github)
+      tarball:  archive name if not name-tag.tar.gz (type=git/github, optional)
+      spec:     path rpm spec, if not rpm/name.spec (type=git/github, optional)
+      uri:      uri for file to download (type=uri)
       filename: outfile if different than uri basename (type=uri, optional)
-      sha1sum: checksum of downloaded file (type=uri, optional if nocheck=True)
-      relpath: upstream cache relative path (type=cached)
+      sha1sum:  chksum of downloaded file (type=uri, optional if nocheck=True)
+      relpath:  upstream cache relative path (type=cached)
 
 
     default args may be provided to automatically determine type:
