@@ -26,6 +26,9 @@ try:
 except getopt.GetoptError:
     usage()
 
+if not dot_sources:
+    usage()
+
 for op,val in ops:
     if   op == '-n': nocheck = True
     elif op == '-s': want_spec = True
