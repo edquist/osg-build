@@ -87,9 +87,9 @@ def update_env(key, val):
     return oldval
 
 def git_archive_remote_ref(url, tag, hash, prefix, spec, ops):
-    utils.checked_call(['git', 'init', '--bare'])
+    utils.checked_call(['git', 'init', '-q', '--bare'])
     utils.checked_call(['git', 'remote', 'add', 'origin', url])
-    utils.checked_call(['git', 'fetch', '--depth=1', 'origin', tag])
+    utils.checked_call(['git', 'fetch', '-q', '--depth=1', 'origin', tag])
     got_sha = utils.checked_backtick(['git', 'rev-parse', 'FETCH_HEAD'])
     if hash or not ops.nocheck:
         check_git_hash(url, tag, hash, got_sha, ops.nocheck)
