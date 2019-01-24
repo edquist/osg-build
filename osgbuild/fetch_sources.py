@@ -127,7 +127,7 @@ def check_git_hash(url, tag, sha, got_sha, nocheck):
         else:
             raise Error(msg)
 
-def chunked_read(handle, size):
+def chunked_read(handle, size=64*1024):
     chunk = handle.read(size)
     while chunk:
         yield chunk
@@ -142,7 +142,7 @@ def download_uri(uri, output_path):
 
     try:
         with open(output_path, 'wb') as desthandle:
-            for chunk in chunked_read(handle, 64 * 1024):
+            for chunk in chunked_read(handle):
                 desthandle.write(chunk)
     except EnvironmentError as err:
         raise Error("Unable to save downloaded file to %s\n%s"
@@ -184,7 +184,7 @@ def check_file_checksum(path, sha1sum, nocheck):
 
 def sha1sum_file(path):
     sha = hashlib.sha1()
-    for chunk in chunked_read(f, 64 * 1024):
+    for chunk in chunked_read(f):
             sha.update(chunk)
     return sha.hexdigest()
 
