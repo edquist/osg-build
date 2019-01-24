@@ -60,7 +60,7 @@ def nvl(arg, default):
     return default if arg is None else arg
 
 def fetch_git_source(url, tag, hash=None, ops=None,
-        name=None, spec=None, tarball=None):
+        name=None, spec=None, tarball=None, type=None):
     name = name or re.sub(r'\.git$', '', os.path.basename(url))
     ops.nocheck or _required(hash, 'hash')
     spec = ops.want_spec and nvl(spec, "rpm/%s.spec" % name)
@@ -156,12 +156,12 @@ FetchOptions = collections.namedtuple('FetchOptions',
     ['destdir', 'cache_prefix', 'nocheck', 'want_spec']
 )
 
-def fetch_cached_source(relpath, sha1sum=None, ops=None):
+def fetch_cached_source(relpath, sha1sum=None, ops=None, **kw):
     uri = os.path.join(ops.cache_prefix, relpath)
-    return fetch_uri_source(uri, sha1sum, ops=ops)
+    return fetch_uri_source(uri, sha1sum, ops=ops, **kw)
 
 
-def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
+def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None, type=None):
     if uri.startswith('/'):
         uri = "file://" + uri
         log.warning("Absolute path names in .source files break the 4th wall")
