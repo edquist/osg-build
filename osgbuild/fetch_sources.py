@@ -45,6 +45,7 @@ def _mk_prefix(name, tag, tarball):
             raise Error("tarball must end with .tar.gz: '%s'" % tarball)
         prefix = tarball[:-len('.tar.gz')]
     else:
+        tag = os.path.basename(tag)
         tarball_version = re.match(r'(?:v(?=\d))?([^-]+)', tag).group(1)
         prefix = "%s-%s" % (name, tarball_version)
     return prefix
