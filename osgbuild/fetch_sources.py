@@ -202,7 +202,7 @@ def parse_meta_url(line):
     kv, args = dual_filter((lambda t: t[0]), map(kvmatch, line.split()))
     return list(zip(*args))[1], dict(kv)
 
-def get_auto_uri_type(auto_uri, *optional, **kw):
+def get_auto_uri_type(*args, **kw):
     # /path/to...          -> file:// uri
     # owner/repo.git       -> github (TAG also required)
     # path/to/file.ext     -> cached
@@ -210,8 +210,10 @@ def get_auto_uri_type(auto_uri, *optional, **kw):
     # proto://...          -> uri
 
     def matches(pat):
-        return re.search(pat, auto_uri)
+        return re.search(pat, args[0])
 
+    if not args:
+        raise Error("No type specified and no default arg provided"
     if matches(r'^\w+://'):
         return 'git' if matches(r'\.git$') else 'uri'
     elif matches(r'^/'):
