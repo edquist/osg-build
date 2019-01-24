@@ -4,6 +4,7 @@ import getopt
 import sys
 import os
 
+from osgbuild import main  # import needed for logging
 from osgbuild.fetch_sources import C, process_dot_source
 
 def usage():
@@ -19,7 +20,6 @@ cache_prefix = C.WEB_CACHE_PREFIX
 destdir = '.'
 nocheck = False
 want_spec = False
-
 
 try:
     ops, dot_sources = getopt.getopt(sys.argv[1:], 'd:ns')
