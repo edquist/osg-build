@@ -262,9 +262,12 @@ def process_source_spec(line, ops):
                     % (meta_type, sorted(handlers)))
 
 def deref_git_sha(sha):
-    output, rc = utils.sbacktick(["git", "rev-parse", sha + "^{}"])
+    cmd = ["git", "rev-parse", "-q", "--verify", sha + "^{}"]
+    output, rc = utils.sbacktick(cmd)
     if rc:
-        raise Error("Git failed to parse rev: '%s'" % sha)
+        print("-" * 79, file=sys.stderr)
+        log.error("Git failed to parse rev: '%s'" % sha)
+        return sha
     return output
 
 def process_dot_source(cache_prefix, sfilename, destdir, nocheck, want_spec):
