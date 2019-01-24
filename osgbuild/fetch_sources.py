@@ -181,18 +181,11 @@ def check_file_checksum(path, sha1sum, nocheck):
             raise Error(msg)
 
 def sha1sum_file(path):
-    return checksum_file(path, "sha1sum")
-
-_checksum_len_by_type = dict(md5sum=32, sha1sum=40, sha256sum=64, sha512sum=128)
-_checksum_type_by_len = dict( (v,k) for k,v in _checksum_len_by_type.items() )
-
-def checksum_file(path, checksum_type):
-    checksum_len = _checksum_len_by_type[checksum_type]
-    output = subprocess.check_output(checksum_type, stdin=open(path))
-    m = re.match(r'([0-9a-f]{%d}) ' % checksum_len, output)
+    output = subprocess.check_output("sha1sum", stdin=open(path))
+    m = re.match(r'([0-9a-f]{40}) ', output)
     if not m:
         print("output was: %s" % output)
-        raise RuntimeError("got garbage output back from '%d'" % checksum_type)
+        raise Error("got garbage output back from sha1sum: '%s'" % output)
     return m.group(1)
 
 def dual_filter(cond, seq):
