@@ -209,17 +209,14 @@ def get_auto_uri_type(*args, **kw):
     # proto://.../repo.git -> git (TAG also required)
     # proto://...          -> uri
 
-    def matches(pat):
-        return re.search(pat, args[0])
-
     if not args:
         raise Error("No type specified and no default arg provided"
-    if matches(r'^\w+://'):
-        return 'git' if matches(r'\.git$') else 'uri'
-    elif matches(r'^/'):
+    if re.search(r'^\w+://', args[0]):
+        return 'git' if args[0].endswith('.git') else 'uri'
+    elif args[0].startswith('/'):
         return 'uri'
     else:
-        return 'github' if matches(r'\.git$') else 'cached'
+        return 'github' if args[0].endswith('.git') else 'cached'
 
 
 def process_meta_url(line, ops):
