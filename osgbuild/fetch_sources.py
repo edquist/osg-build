@@ -34,9 +34,9 @@ else:
     logging.basicConfig(format="%(message)s", level=logging.INFO)
 
 
-def _required(item, key, line):
+def _required(item, key):
     if item is None:
-        raise Error("No %s specified for line: %s" % (key, line))
+        raise Error("No '%s' specified" % key)
 
 def _mk_prefix(name, tag, tarball):
     if tarball:
@@ -51,7 +51,7 @@ def _mk_prefix(name, tag, tarball):
 def fetch_github_source(repo, tag, hash=None, ops=None, **kw):
     m = re.match(r"([^\s/]+)/([^\s/]+?)(?:.git)?$", repo)
     if not m:
-        raise Error("Repo syntax must be owner/project: %s" % ops.line)
+        raise Error("'repo' syntax for type=github must be owner/project")
     url = "https://github.com/" + repo
     return fetch_git_source(url, tag, hash, ops=ops, **kw)
 
@@ -61,7 +61,7 @@ def nvl(arg, default):
 def fetch_git_source(url, tag, hash=None, ops=None,
         name=None, spec=None, tarball=None):
     name = name or re.sub(r'\.git$', '', os.path.basename(url))
-    ops.nocheck or _required(hash, 'hash', ops.line)
+    ops.nocheck or _required(hash, 'hash')
     spec = ops.want_spec and nvl(spec, "rpm/%s.spec" % name)
     prefix = _mk_prefix(name, tag, tarball)
 
@@ -149,7 +149,7 @@ def download_uri(uri, output_path):
 
 # common fetch options not found in .source line
 FetchOptions = collections.namedtuple('FetchOptions',
-    ['destdir', 'cache_prefix', 'nocheck', 'want_spec', 'line']
+    ['destdir', 'cache_prefix', 'nocheck', 'want_spec']
 )
 
 def fetch_cached_source(relpath, sha1sum=None, ops=None):
@@ -251,7 +251,6 @@ def process_meta_url(line, ops):
     """
 
     args,kv = parse_meta_url(line)
-    ops = ops._replace(line=line)
 
     handlers = dict(
         git    = fetch_git_source,
@@ -266,7 +265,7 @@ def process_meta_url(line, ops):
         files = list(filter(None, (tar_gz, spec)))
         return files
     else:
-        raise Error("Unrecognized type '%s' in line: %s" % (meta_type, line))
+        raise Error("Unrecognized type '%s'" % meta_type)
 
 
 def deref_git_sha(sha):
@@ -282,14 +281,18 @@ def process_dot_source(cache_prefix, sfilename, destdir, nocheck):
     """
 
     ops = FetchOptions(destdir=destdir, cache_prefix=cache_prefix,
-                       nocheck=nocheck, want_spec=True, line='')
+                       nocheck=nocheck, want_spec=True)
 
     utils.safe_makedirs(destdir)
     filenames = []
     for line in open(sfilename):
         line = re.sub(r'(^|\s)#.*', '', line).strip()
         if line:
-            filenames += process_meta_url(line, ops)
+            try:
+                filenames += process_meta_url(line, ops)
+            except Error e:
+                log.error("Error processing source line: '%s'" % line)
+                raise
 
     return filenames
 
