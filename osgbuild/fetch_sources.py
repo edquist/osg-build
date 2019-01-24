@@ -214,9 +214,9 @@ def get_auto_uri_type(*args, **kw):
         return 'github' if args[0].endswith('.git') else 'cached'
 
 
-def process_meta_url(line, ops):
+def process_source_spec(line, ops):
     """
-    Process URL spec: [args...] [field=value...]
+    Process source spec line: [args...] [field=value...]
 
     fields names:
 
@@ -284,7 +284,7 @@ def process_dot_source(cache_prefix, sfilename, destdir, nocheck):
         line = re.sub(r'(^|\s)#.*', '', line).strip()
         if line:
             try:
-                filenames += process_meta_url(line, ops)
+                filenames += process_source_spec(line, ops)
             except Error as e:
                 log.error("Error processing source line: '%s'" % line)
                 raise
