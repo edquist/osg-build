@@ -203,12 +203,6 @@ def parse_meta_url(line):
     return list(zip(*args))[1], dict(kv)
 
 def get_auto_uri_type(*args, **kw):
-    # /path/to...          -> file:// uri
-    # owner/repo.git       -> github (TAG also required)
-    # path/to/file.ext     -> cached
-    # proto://.../repo.git -> git (TAG also required)
-    # proto://...          -> uri
-
     if not args:
         raise Error("No type specified and no default arg provided"
     if re.search(r'^\w+://', args[0]):
@@ -221,8 +215,7 @@ def get_auto_uri_type(*args, **kw):
 
 def process_meta_url(line, ops):
     """
-    Process a serialized URL spec.  Should be of the format:
-    [args...] [field=value...]
+    Process URL spec: [args...] [field=value...]
 
     fields:
       type: {git|github|uri|cached}
@@ -231,11 +224,30 @@ def process_meta_url(line, ops):
       tag:  git tag or ref to archive (type=git/github)
       hash: git commit hash (type=git/github, optional if nocheck=True)
       repo: owner/repo (type=github)
+      tarball: archive name if not name-tag.tar.gz (type=git/github, optional)
       spec: path rpm spec, if not rpm/name.spec (type=git/github, optional)
       uri:  uri for file to download (type=uri)
       filename: outfile if different than uri basename (type=uri, optional)
       sha1sum: checksum of downloaded file (type=uri, optional if nocheck=True)
       relpath: upstream cache relative path (type=cached)
+
+
+    default args may be provided to automatically determine type:
+
+        owner/repo.git       -> github
+        proto://.../repo.git -> git
+        pkg/version/file.ext -> cached
+        proto://...          -> uri
+        /abs/path/to/file    -> uri (file://)
+
+
+    unnamed args will be interpreted for each type:
+
+        github: repo tag  [hash]
+        git:    url  tag  [hash]
+
+        cached: relpath [sha1sum]
+        uri:    uri     [sha1sum]
     """
 
     args,kv = parse_meta_url(line)
