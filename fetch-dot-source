@@ -4,7 +4,8 @@ import getopt
 import sys
 import os
 
-from osgbuild import main  # import needed for logging
+import osgbuild.main  # import needed for logging
+
 from osgbuild.fetch_sources import C, process_dot_source
 
 def usage():
