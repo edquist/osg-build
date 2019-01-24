@@ -133,7 +133,7 @@ def chunked_read(handle, size=64*1024):
         yield chunk
         chunk = handle.read(size)
 
-def download_uri(uri, output_path):
+def download_uri(uri, outfile):
     log.info('Retrieving ' + uri)
     try:
         handle = urllib.request.urlopen(uri)
@@ -142,13 +142,12 @@ def download_uri(uri, output_path):
 
     sha = hashlib.sha1()
     try:
-        with open(output_path, 'wb') as desthandle:
+        with open(outfile, 'wb') as desthandle:
             for chunk in chunked_read(handle):
                 desthandle.write(chunk)
                 sha.update(chunk)
-    except EnvironmentError as err:
-        raise Error("Unable to save downloaded file to %s\n%s"
-                                           % (output_path, err))
+    except EnvironmentError as e:
+        raise Error("Unable to save downloaded file to %s\n%s" % (outfile, e))
     return sha.hexdigest()
 
 
