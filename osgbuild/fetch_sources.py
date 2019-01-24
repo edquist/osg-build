@@ -94,7 +94,7 @@ def git_archive_remote_ref(url, tag, hash, prefix, spec, ops):
     if hash or not ops.nocheck:
         check_git_hash(url, tag, hash, got_sha, ops.nocheck)
 
-    dest_tar_gz = "%s/%s.tar.gz" % (ops.destdir, prefix)
+    dest_tar_gz = os.path.join(ops.destdir, prefix + ".tar.gz")
     git_archive_cmd = ['git', 'archive', '--format=tar',
                                          '--prefix=%s/' % prefix, got_sha]
     gzip_cmd = ['gzip', '-n']
@@ -108,7 +108,7 @@ def git_archive_remote_ref(url, tag, hash, prefix, spec, ops):
     return list(filter(None, [dest_tar_gz, spec]))
 
 def try_get_spec(destdir, got_sha, spec):
-    dest_spec = "%s/%s" % (destdir, os.path.basename(spec))
+    dest_spec = os.path.join(destdir, os.path.basename(spec))
     spec_rev = '%s:%s' % (got_sha, spec)
     with open(dest_spec, "w") as specf:
         rc = utils.unchecked_call(['git', 'show', spec_rev], stdout=specf)
