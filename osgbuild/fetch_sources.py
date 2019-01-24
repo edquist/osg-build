@@ -140,13 +140,16 @@ def download_uri(uri, output_path):
     except urllib.error.URLError as err:
         raise Error("Unable to download %s\n%s" % (uri, err))
 
+    sha = hashlib.sha1()
     try:
         with open(output_path, 'wb') as desthandle:
             for chunk in chunked_read(handle):
                 desthandle.write(chunk)
+                sha.update(chunk)
     except EnvironmentError as err:
         raise Error("Unable to save downloaded file to %s\n%s"
                                            % (output_path, err))
+    return sha.hexdigest()
 
 
 # common fetch options not found in .source line
@@ -165,28 +168,21 @@ def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
         log.warning("Absolute path names in .source files break the 4th wall")
 
     outfile = os.path.join(ops.destdir, os.path.basename(filename or uri))
-    download_uri(uri, outfile)
+    got_sha1sum = download_uri(uri, outfile)
 
     if sha1sum: # or not ops.nocheck:
-        check_file_checksum(outfile, sha1sum, ops.nocheck)
+        check_file_checksum(outfile, sha1sum, got_sha1sum, ops.nocheck)
 
     return [outfile]
 
-def check_file_checksum(path, sha1sum, nocheck):
-    efmt = "sha1sum mismatch for '%s':\n    expected: %s\n    got:   %s"
-    got_sha1sum = sha1sum_file(path)
+def check_file_checksum(path, sha1sum, got_sha1sum, nocheck):
+    efmt = "sha1 mismatch for '%s':\n    expected: %s\n    got:   %s"
     if sha1sum != got_sha1sum:
         msg = efmt % (path, sha1sum, got_sha1sum)
         if nocheck:
             log.warning(msg + "\n    (ignored)")
         else:
             raise Error(msg)
-
-def sha1sum_file(path):
-    sha = hashlib.sha1()
-    for chunk in chunked_read(open(path, "rb")):
-            sha.update(chunk)
-    return sha.hexdigest()
 
 def dual_filter(cond, seq):
     pos,neg = [],[]
