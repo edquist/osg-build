@@ -184,7 +184,7 @@ def check_file_checksum(path, sha1sum, nocheck):
 
 def sha1sum_file(path):
     sha = hashlib.sha1()
-    for chunk in chunked_read(f):
+    for chunk in chunked_read(open(path, "rb")):
             sha.update(chunk)
     return sha.hexdigest()
 
