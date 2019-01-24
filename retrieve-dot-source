@@ -1,0 +1,39 @@
+#!/usr/bin/python
+
+import getopt
+import sys
+
+from osgbuild import fetch_sources
+
+C = fetch_sources.C
+
+def usage():
+    print("Usage: {script} [-d destdir] [-n] [-s] upstream.source [...]\n\n"
+          "Options:\n"
+          "  -d destdir   specify output location\n"
+          "  -n           do not require matching hashes (nocheck)\n"
+          "  -s           extract rpm spec from git sources (want_spec)"
+          .format(script=os.path.basename(__file__)))
+    sys.exit(0)
+
+cache_prefix = C.WEB_CACHE_PREFIX
+destdir = '.'
+nocheck = False
+want_spec = False
+
+
+try:
+    ops, dot_sources = getopt.getopt(sys.argv[1:], 'd:ns')
+except getopt.GetoptError:
+    usage()
+
+for op,val in ops:
+    if   op == '-n': nocheck = True
+    elif op == '-s': want_spec = True
+    elif op == '-d': destdir = val
+
+for src in dot_sources:
+    files = process_dot_source(cache_prefix, src, destdir, nocheck, want_spec)
+    for f in files:
+        print(f)
+
