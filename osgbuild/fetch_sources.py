@@ -195,15 +195,18 @@ def checksum_file(path, checksum_type):
         raise RuntimeError("got garbage output back from '%d'" % checksum_type)
     return m.group(1)
 
+def dual_filter(cond, seq):
+    pos,neg = [],[]
+    for x in seq:
+        (pos if cond(x) else neg).append(x)
+    return pos,neg
+
+def kvmatch(s):
+    return re.search(r'^(?:(\w+)=)?(.*)', s).groups()
+
 def parse_meta_url(line):
-    def kvmatch(s):
-        return re.search(r'^(?:(\w+)=)?(.*)', s).groups()
-
-    kv = list(map(kvmatch, line.split()))
-    args = [ a[1] for a in filter((lambda t: not t[0]), kv) ]
-    kv = dict( filter((lambda t: t[0]), kv) )
-
-    return args, kv
+    kv, args = dual_filter((lambda t: t[0]), map(kvmatch, line.split()))
+    return list(zip(*args))[1], dict(kv)
 
 def get_auto_uri_type(auto_uri, *optional, **kw):
     # /path/to...          -> file:// uri
