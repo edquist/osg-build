@@ -265,7 +265,6 @@ def deref_git_sha(sha):
     cmd = ["git", "rev-parse", "-q", "--verify", sha + "^{}"]
     output, rc = utils.sbacktick(cmd)
     if rc:
-        print("-" * 79, file=sys.stderr)
         log.error("Git failed to parse rev: '%s'" % sha)
         return sha
     return output
