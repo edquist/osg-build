@@ -104,7 +104,7 @@ def git_archive_remote_ref(url, tag, hash, prefix, spec, ops):
     if spec:
         spec = try_get_spec(ops.destdir, got_sha, spec)
 
-    return got_sha, dest_tar_gz, spec
+    return list(filter(None, [dest_tar_gz, spec]))
 
 def try_get_spec(destdir, got_sha, spec):
     dest_spec = "%s/%s" % (destdir, os.path.basename(spec))
@@ -169,7 +169,7 @@ def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
     if sha1sum: # or not ops.nocheck:
         check_file_checksum(outfile, sha1sum, ops.nocheck)
 
-    return outfile
+    return [outfile]
 
 def check_file_checksum(path, sha1sum, nocheck):
     efmt = "sha1sum mismatch for '%s':\n    expected: %s\n    got:   %s"
