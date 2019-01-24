@@ -205,7 +205,7 @@ def parse_meta_url(line):
 
 def get_auto_uri_type(*args, **kw):
     if not args:
-        raise Error("No type specified and no default arg provided"
+        raise Error("No type specified and no default arg provided")
     if re.search(r'^\w+://', args[0]):
         return 'git' if args[0].endswith('.git') else 'uri'
     elif args[0].startswith('/'):
