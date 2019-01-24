@@ -17,10 +17,12 @@ def usage():
           .format(script=os.path.basename(__file__)))
     sys.exit(0)
 
-cache_prefix = C.WEB_CACHE_PREFIX
-destdir = '.'
-nocheck = False
-want_spec = False
+options = dict(
+    cache_prefix = C.WEB_CACHE_PREFIX,
+    destdir = '.',
+    nocheck = False,
+    want_spec = False
+)
 
 try:
     ops, dot_sources = getopt.getopt(sys.argv[1:], 'd:ns')
@@ -31,12 +33,12 @@ if not dot_sources:
     usage()
 
 for op,val in ops:
-    if   op == '-n': nocheck = True
-    elif op == '-s': want_spec = True
-    elif op == '-d': destdir = val
+    if   op == '-n': options['nocheck'] = True
+    elif op == '-s': options['want_spec'] = True
+    elif op == '-d': options['destdir'] = val
 
 for src in dot_sources:
-    files = process_dot_source(cache_prefix, src, destdir, nocheck, want_spec)
+    files = process_dot_source(sfilename=src, **options)
     for f in files:
         print(f)
 
