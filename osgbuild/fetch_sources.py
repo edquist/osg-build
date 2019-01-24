@@ -201,8 +201,9 @@ def dual_filter(cond, seq):
         (pos if cond(x) else neg).append(x)
     return pos,neg
 
-def kvmatch(s):
-    return re.search(r'^(?:(\w+)=)?(.*)', s).groups()
+def kvmatch(arg):
+    # return (key,val) for "key=val", else return (None, arg)
+    return re.search(r'^(?:(\w+)=)?(.*)', arg).groups()
 
 def parse_meta_url(line):
     kv, args = dual_filter((lambda t: t[0]), map(kvmatch, line.split()))
