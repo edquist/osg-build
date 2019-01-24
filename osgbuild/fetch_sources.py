@@ -87,6 +87,7 @@ def update_env(key, val):
     return oldval
 
 def git_archive_remote_ref(url, tag, hash, prefix, spec, ops):
+    log.info('Retrieving %s %s' % (url, tag))
     utils.checked_call(['git', 'init', '-q', '--bare'])
     utils.checked_call(['git', 'remote', 'add', 'origin', url])
     utils.checked_call(['git', 'fetch', '-q', '--depth=1', 'origin', tag])
