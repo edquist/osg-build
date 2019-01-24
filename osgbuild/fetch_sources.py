@@ -222,13 +222,20 @@ def get_auto_uri_type(*args, **kw):
 def process_meta_url(line, ops):
     """
     Process a serialized URL spec.  Should be of the format:
-     type=git url=https://github.com/opensciencegrid/cvmfs-config-osg.git name=cvmfs-config-osg tag=0.1 hash=e2b54cd1b94c9e3eaee079490c9d85f193c52249
-    'name' can be derived from the URL if the last component in the URL is of the form 'NAME.git'
-    OR
-     type=github repo=opensciencegrid/cvmfs-config-osg tag=0.1 hash=e2b54cd1b94c9e3eaee079490c9d85f193c52249
-    'name' can be taken from the repo if not specified.
+    [args...] [field=value...]
 
-    If nocheck is True, hashes do not have to match.
+    fields:
+      type: {git|github|uri|cached}
+      url:  git clone url (type=git)
+      name: repo name if different from url basename (type=git, optional)
+      tag:  git tag or ref to archive (type=git/github)
+      hash: git commit hash (type=git/github, optional if nocheck=True)
+      repo: owner/repo (type=github)
+      spec: path rpm spec, if not rpm/name.spec (type=git/github, optional)
+      uri:  uri for file to download (type=uri)
+      filename: outfile if different than uri basename (type=uri, optional)
+      sha1sum: checksum of downloaded file (type=uri, optional if nocheck=True)
+      relpath: upstream cache relative path (type=cached)
     """
 
     args,kv = parse_meta_url(line)
