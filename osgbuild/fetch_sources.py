@@ -196,9 +196,12 @@ def checksum_file(path, checksum_type):
     return m.group(1)
 
 def parse_meta_url(line):
-    kv = [ entry.split("=", 1) for entry in line.split() ]
-    args = [ a[0] for a in filter((lambda t: len(t) == 1), kv) ]
-    kv = dict( filter((lambda t: len(t) == 2), kv) )
+    def kvmatch(s):
+        return re.search(r'^(?:(\w+)=)?(.*)', s).groups()
+
+    kv = list(map(kvmatch, line.split()))
+    args = [ a[1] for a in filter((lambda t: not t[0]), kv) ]
+    kv = dict( filter((lambda t: t[0]), kv) )
 
     return args, kv
 
