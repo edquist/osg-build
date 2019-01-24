@@ -262,10 +262,7 @@ def process_meta_url(line, ops):
     )
     meta_type = kv.get('type') or get_auto_uri_type(*args, **kv)
     if meta_type in handlers:
-        fetch_source = handlers[meta_type]
-        sha, tar_gz, spec = fetch_source(*args, ops=ops, **kv)
-        files = list(filter(None, (tar_gz, spec)))
-        return files
+        return handlers[meta_type](*args, ops=ops, **kv)
     else:
         raise Error("Unrecognized type '%s' (valid types are: %s)"
                     % (meta_type, sorted(handlers)))
