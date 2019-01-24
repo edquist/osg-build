@@ -175,7 +175,7 @@ def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
     return [outfile]
 
 def check_file_checksum(path, sha1sum, got_sha1sum, nocheck):
-    efmt = "sha1 mismatch for '%s':\n    expected: %s\n    got:   %s"
+    efmt = "sha1 mismatch for '%s':\n    expected: %s\n         got: %s"
     if sha1sum != got_sha1sum:
         msg = efmt % (path, sha1sum, got_sha1sum)
         if nocheck:
