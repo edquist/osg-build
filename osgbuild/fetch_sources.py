@@ -276,11 +276,7 @@ def deref_git_sha(sha):
     return output
 
 def process_dot_source(cache_prefix, sfilename, destdir, nocheck):
-    """Read a .source file, fetch any files mentioned in it from the
-    cache.
-
-    """
-
+    """Read a .source file, fetch any sources specified in it."""
     ops = FetchOptions(destdir=destdir, cache_prefix=cache_prefix,
                        nocheck=nocheck, want_spec=True)
 
