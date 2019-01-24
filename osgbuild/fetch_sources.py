@@ -291,7 +291,7 @@ def process_dot_source(cache_prefix, sfilename, destdir, nocheck):
         if line:
             try:
                 filenames += process_meta_url(line, ops)
-            except Error e:
+            except Error as e:
                 log.error("Error processing source line: '%s'" % line)
                 raise
 
