@@ -60,7 +60,7 @@ def nvl(arg, default):
     return default if arg is None else arg
 
 def fetch_git_source(url, tag, hash=None, ops=None,
-        name=None, spec=None, tarball=None, type=None):
+        name=None, spec=None, tarball=None):
     name = name or re.sub(r'\.git$', '', os.path.basename(url))
     ops.nocheck or _required(hash, 'hash')
     spec = ops.want_spec and nvl(spec, "rpm/%s.spec" % name)
@@ -156,12 +156,12 @@ FetchOptions = collections.namedtuple('FetchOptions',
     ['destdir', 'cache_prefix', 'nocheck', 'want_spec']
 )
 
-def fetch_cached_source(relpath, sha1sum=None, ops=None, **kw):
+def fetch_cached_source(relpath, sha1sum=None, ops=None):
     uri = os.path.join(ops.cache_prefix, relpath)
-    return fetch_uri_source(uri, sha1sum, ops=ops, **kw)
+    return fetch_uri_source(uri, sha1sum, ops=ops)
 
 
-def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None, type=None):
+def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
     if uri.startswith('/'):
         uri = "file://" + uri
         log.warning("Absolute path names in .source files break the 4th wall")
@@ -254,7 +254,7 @@ def process_source_spec(line, ops):
         cached = fetch_cached_source,
         uri    = fetch_uri_source,
     )
-    meta_type = kv.get('type') or get_auto_uri_type(*args, **kv)
+    meta_type = kv.pop('type', None) or get_auto_uri_type(*args, **kv)
     if meta_type in handlers:
         return handlers[meta_type](*args, ops=ops, **kv)
     else:
