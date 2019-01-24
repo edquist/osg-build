@@ -8,6 +8,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 import collections
 import fnmatch
+import hashlib
 import logging
 import glob
 import re
@@ -182,12 +183,10 @@ def check_file_checksum(path, sha1sum, nocheck):
             raise Error(msg)
 
 def sha1sum_file(path):
-    output = subprocess.check_output("sha1sum", stdin=open(path))
-    m = re.match(r'([0-9a-f]{40}) ', output)
-    if not m:
-        print("output was: %s" % output)
-        raise Error("got garbage output back from sha1sum: '%s'" % output)
-    return m.group(1)
+    sha = hashlib.sha1()
+    for chunk in chunked_read(f, 64 * 1024):
+            sha.update(chunk)
+    return sha.hexdigest()
 
 def dual_filter(cond, seq):
     pos,neg = [],[]
