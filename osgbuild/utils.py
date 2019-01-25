@@ -133,7 +133,7 @@ def unchecked_pipeline3(cmds, stdin=None, stdout=None, **kw):
     """Run a list of commands pipelined together, returns zero if all succeed,
     or else the first nonzero return code if any fail.
 
-    argument semantics are the same as checked_pipeline
+    Argument semantics are the same as checked_pipeline
 
     Prints the commands to run and the results if loglevel is DEBUG.
     """
@@ -148,7 +148,7 @@ def unchecked_pipeline3(cmds, stdin=None, stdout=None, **kw):
             pipes[-2].stdout.close()
             pipes[-2].stdout = None
     rets = [ p.wait() for p in pipes ]
-    log.debug("Subprocess returned (%s)" % ','.join(map(str, rets)))
+    log.debug("Subprocesses returned (%s)" % ','.join(map(str, rets)))
     return list(filter(None, rets))[0] if any(rets) else 0
 
 def backtick(*args, **kwargs):
