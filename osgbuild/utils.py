@@ -190,7 +190,7 @@ def unchecked_pipeline3(cmds, stdin=None, stdout=None, **kw):
 
     rets = [ p.wait() for p in pipes ]
     log.debug("Subprocess returned (%s)" % ','.join(map(str, rets)))
-    return next(iter(filter(None, rets))) if any(rets) else 0
+    return list(filter(None, rets))[0] if any(rets) else 0
 
 def backtick(*args, **kwargs):
     """Call a process and return its output, ignoring return code.
