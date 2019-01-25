@@ -181,7 +181,7 @@ def unchecked_pipeline3(cmds, stdin=None, stdout=None, **kw):
     pipes = []
     final = len(cmds) - 1
     for i,cmd in enumerate(cmds):
-        _stdin  = stdin  if i == 0     else pipes[-1].stout
+        _stdin  = stdin  if i == 0     else pipes[-1].stdout
         _stdout = stdout if i == final else PIPE
         pipes.append(Popen(cmd, stdin=_stdin, stdout=_stdout, **kw))
         if i > 0:
