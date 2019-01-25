@@ -46,7 +46,7 @@ for op,val in ops:
     elif op == '-s': options['want_spec'] = True
     elif op == '-d': options['destdir'] = val
     elif op == '-c': options['cache_prefix'] = val
-    elif op == '-a': C.AFS_CACHE_PREFIX
+    elif op == '-a': options['cache_prefix'] = C.AFS_CACHE_PREFIX
     elif op == '-v': log.setLevel(logging.DEBUG)
     elif op == '-q': log.setLevel(logging.WARNING)
 
