@@ -119,7 +119,7 @@ def unchecked_pipeline(cmds, stdin=None, stdout=None, **kw):
 
     Prints the commands to run and the results if loglevel is DEBUG.
     """
-    log.debug("Running %s" % ' | '.join(cmds))
+    log.debug("Running %s" % ' | '.join(map(str, cmds)))
     pipes = []
     final = len(cmds) - 1
     for i,cmd in enumerate(cmds):
