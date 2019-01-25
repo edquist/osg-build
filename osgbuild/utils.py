@@ -179,17 +179,14 @@ def unchecked_pipeline3(cmds, stdin=None, stdout=None, **kw):
     log.debug("Running %s" % ' | '.join(cmds))
 
     pipes = []
-    p1 = None
     final = len(cmds) - 1
     for i,cmd in enumerate(cmds):
-        _stdin  = stdin  if i == 0     else p1.stout
+        _stdin  = stdin  if i == 0     else pipes[-1].stout
         _stdout = stdout if i == final else PIPE
-        p2 = Popen(cmd, stdin=_stdin, stdout=_stdout, **kw)
-        pipes.append(p2)
+        pipes.append(Popen(cmd, stdin=_stdin, stdout=_stdout, **kw))
         if i > 0:
-            p1.stdout.close()
-            p1.stdout = None
-        p1 = p2
+            pipes[-2].stdout.close()
+            pipes[-2].stdout = None
 
     rets = [ p.wait() for p in pipes ]
     log.debug("Subprocess returned (%s)" % ','.join(map(str, rets)))
