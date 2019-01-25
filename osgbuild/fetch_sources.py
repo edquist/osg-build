@@ -102,7 +102,7 @@ def git_archive_remote_ref(url, tag, hash, prefix, spec, ops):
     gzip_cmd = ['gzip', '-n']
 
     with open(dest_tar_gz, "w") as destf:
-        utils.checked_pipeline(git_archive_cmd, gzip_cmd, stdout=destf)
+        utils.checked_pipeline([git_archive_cmd, gzip_cmd], stdout=destf)
 
     if spec:
         spec = try_get_spec(ops.destdir, got_sha, spec)
