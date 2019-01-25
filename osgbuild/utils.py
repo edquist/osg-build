@@ -103,13 +103,13 @@ def checked_pipeline(cmds, stdin=None, stdout=None, **kw):
     Each item in cmds is interpreted as a cmd argument for subprocess.Popen
     stdin  (optional) applies only to cmd[0]
     stdout (optional) applies only to cmd[-1]
-    any additional kw args apply to both cmd1 and cmd2
+    any additional kw args apply to all cmds
 
     Prints the commands to run and the results if loglevel is DEBUG.
     """
-    err = unchecked_pipeline(cmd1, cmd2, stdin, stdout, **kw)
+    err = unchecked_pipeline(cmds, stdin, stdout, **kw)
     if err:
-        raise CalledProcessError([cmd1, cmd2, kw], err, None)
+        raise CalledProcessError([cmds, kw], err, None)
 
 def unchecked_pipeline(cmds, stdin=None, stdout=None, **kw):
     """Run a list of commands pipelined together, returns zero if all succeed,
