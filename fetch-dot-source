@@ -5,7 +5,9 @@ import getopt
 import sys
 import os
 
-import osgbuild.main  # import needed for logging
+import osgbuild.main
+
+log = osgbuild.main.log
 
 from osgbuild.fetch_sources import C, process_dot_source
 from osgbuild.error import Error
@@ -15,7 +17,11 @@ def usage():
           "Options:\n"
           "  -d destdir   specify output location\n"
           "  -n           do not require matching hashes (nocheck)\n"
-          "  -s           extract rpm spec from git sources (want_spec)"
+          "  -s           extract rpm spec from git sources (want_spec)\n"
+          "  -v           verbose; set loglevel to DEBUG\n"
+          "  -q           quiet; set loglevel to WARNING (no INFO msgs)\n"
+          "  -c cachepfx  specify upstream cache location prefix\n"
+          "  -a           set upstream cache prefix to UW AFS location\n"
           .format(script=os.path.basename(__file__)))
     sys.exit(0)
 
@@ -27,7 +33,7 @@ options = dict(
 )
 
 try:
-    ops, dot_sources = getopt.getopt(sys.argv[1:], 'd:ns')
+    ops, dot_sources = getopt.getopt(sys.argv[1:], 'd:nsvqc:a')
 except getopt.GetoptError:
     usage()
 
@@ -38,6 +44,10 @@ for op,val in ops:
     if   op == '-n': options['nocheck'] = True
     elif op == '-s': options['want_spec'] = True
     elif op == '-d': options['destdir'] = val
+    elif op == '-c': options['cache_prefix'] = val
+    elif op == '-a': C.AFS_CACHE_PREFIX
+    elif op == '-v': log.setLevel(logging.DEBUG)
+    elif op == '-q': log.setLevel(logging.WARNING)
 
 def main():
     for src in dot_sources:
