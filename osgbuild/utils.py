@@ -137,20 +137,16 @@ def unchecked_pipeline3(cmds, stdin=None, stdout=None, **kw):
 
     Prints the commands to run and the results if loglevel is DEBUG.
     """
-    from subprocess import Popen, PIPE
-
     log.debug("Running %s" % ' | '.join(cmds))
-
     pipes = []
     final = len(cmds) - 1
     for i,cmd in enumerate(cmds):
         _stdin  = stdin  if i == 0     else pipes[-1].stdout
-        _stdout = stdout if i == final else PIPE
-        pipes.append(Popen(cmd, stdin=_stdin, stdout=_stdout, **kw))
+        _stdout = stdout if i == final else subprocess.PIPE
+        pipes.append(subprocess.Popen(cmd, stdin=_stdin, stdout=_stdout, **kw))
         if i > 0:
             pipes[-2].stdout.close()
             pipes[-2].stdout = None
-
     rets = [ p.wait() for p in pipes ]
     log.debug("Subprocess returned (%s)" % ','.join(map(str, rets)))
     return list(filter(None, rets))[0] if any(rets) else 0
