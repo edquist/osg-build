@@ -129,43 +129,6 @@ def unchecked_pipeline(cmd1, cmd2, stdin=None, stdout=None, **kw):
     log.debug("Subprocess returned (%s,%s)" % (e1,e2))
     return e1 or e2
 
-def unchecked_pipeline2(cmds, stdin=None, stdout=None, **kw):
-    """Run a list of commands pipelined together, returns zero if all succeed,
-    or else the first nonzero return code if any fail.
-
-    argument semantics are the same as checked_pipeline
-
-    Prints the commands to run and the results if loglevel is DEBUG.
-    """
-    from subprocess import Popen, PIPE
-
-    if len(cmds) == 1:
-        return unchecked_call(cmds[0], stdin=stdin, stdout=stdout, **kw)
-
-    log.debug("Running %s" % ' | '.join(cmds))
-
-    pipes = []
-    for cmd in cmds[:1]:
-        p1 = Popen(cmd, stdin=stdin, stdout=PIPE, **kw)
-        pipes.append(p1)
-
-    for cmd in cmds[1:-1]:
-        p2 = Popen(cmd, stdin=p1.stdout, stdout=PIPE, **kw)
-        pipes.append(p2)
-	p1.stdout.close()
-	p1.stdout = None
-	p1 = p2
-
-    for cmd in cmds[-1:]:
-        p2 = Popen(cmd, stdin=p1.stdout, stdout=stdout, **kw)
-        pipes.append(p2)
-	p1.stdout.close()
-	p1.stdout = None
-
-    rets = [ p.wait() for p in pipes ]
-    log.debug("Subprocess returned (%s)" % ','.join(map(str, rets)))
-    return next(iter(filter(None, rets))) if any(rets) else 0
-
 def unchecked_pipeline3(cmds, stdin=None, stdout=None, **kw):
     """Run a list of commands pipelined together, returns zero if all succeed,
     or else the first nonzero return code if any fail.
