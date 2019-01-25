@@ -166,6 +166,35 @@ def unchecked_pipeline2(cmds, stdin=None, stdout=None, **kw):
     log.debug("Subprocess returned (%s)" % ','.join(map(str, rets)))
     return next(iter(filter(None, rets))) if any(rets) else 0
 
+def unchecked_pipeline3(cmds, stdin=None, stdout=None, **kw):
+    """Run a list of commands pipelined together, returns zero if all succeed,
+    or else the first nonzero return code if any fail.
+
+    argument semantics are the same as checked_pipeline
+
+    Prints the commands to run and the results if loglevel is DEBUG.
+    """
+    from subprocess import Popen, PIPE
+
+    log.debug("Running %s" % ' | '.join(cmds))
+
+    pipes = []
+    p1 = None
+    final = len(cmds) - 1
+    for i,cmd in enumerate(cmds):
+        _stdin  = stdin  if i == 0     else p1.stout
+        _stdout = stdout if i == final else PIPE
+        p2 = Popen(cmd, stdin=_stdin, stdout=_stdout, **kw)
+        pipes.append(p2)
+        if i > 0:
+            p1.stdout.close()
+            p1.stdout = None
+        p1 = p2
+
+    rets = [ p.wait() for p in pipes ]
+    log.debug("Subprocess returned (%s)" % ','.join(map(str, rets)))
+    return next(iter(filter(None, rets))) if any(rets) else 0
+
 def backtick(*args, **kwargs):
     """Call a process and return its output, ignoring return code.
     See checked_backtick() for semantics.
