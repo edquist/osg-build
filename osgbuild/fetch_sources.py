@@ -61,14 +61,17 @@ def nvl(arg, default):
     return default if arg is None else arg
 
 def fetch_git_source(url, tag, hash=None, ops=None,
-        name=None, spec=None, tarball=None):
+        name=None, spec=None, tarball=None, prefix=None):
     name = name or re.sub(r'\.git$', '', os.path.basename(url))
     ops.nocheck or _required(hash, 'hash')
     spec = ops.want_spec and nvl(spec, "rpm/%s.spec" % name)
-    prefix = _mk_prefix(name, tag, tarball)
+    prefix = prefix and prefix.strip('/')
+    prefix = prefix or _mk_prefix(name, tag, tarball)
+    tarball = tarball and os.path.basename(tarball)
+    tarball = tarball or prefix + ".tar.gz"
 
     return run_with_tmp_git_dir(ops.destdir, lambda:
-        git_archive_remote_ref(url, tag, hash, prefix, spec, ops))
+        git_archive_remote_ref(url, tag, hash, prefix, tarball, spec, ops))
 
 def run_with_tmp_git_dir(destdir, call):
     git_dir = tempfile.mkdtemp(dir=destdir)
@@ -87,7 +90,7 @@ def update_env(key, val):
         os.environ[key] = val
     return oldval
 
-def git_archive_remote_ref(url, tag, hash, prefix, spec, ops):
+def git_archive_remote_ref(url, tag, hash, prefix, tarball, spec, ops):
     log.info('Retrieving %s %s' % (url, tag))
     utils.checked_call(['git', 'init', '-q', '--bare'])
     utils.checked_call(['git', 'remote', 'add', 'origin', url])
@@ -96,7 +99,7 @@ def git_archive_remote_ref(url, tag, hash, prefix, spec, ops):
     if hash or not ops.nocheck:
         check_git_hash(url, tag, hash, got_sha, ops.nocheck)
 
-    dest_tar_gz = os.path.join(ops.destdir, prefix + ".tar.gz")
+    dest_tar_gz = os.path.join(ops.destdir, tarball)
     git_archive_cmd = ['git', 'archive', '--format=tar',
                                          '--prefix=%s/' % prefix, got_sha]
     gzip_cmd = ['gzip', '-n']
