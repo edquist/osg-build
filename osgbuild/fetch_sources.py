@@ -115,13 +115,13 @@ def git_archive_remote_ref(url, tag, hash, prefix, tarball, spec, ops):
 def try_get_spec(destdir, got_sha, spec):
     dest_spec = os.path.join(destdir, os.path.basename(spec))
     spec_rev = '%s:%s' % (got_sha, spec)
-    with open(dest_spec, "w") as specf:
-        rc = utils.unchecked_call(['git', 'show', spec_rev], stdout=specf)
+    _, rc = utils.sbacktick(['git', 'rev-parse', '-q', '--verify', spec_rev])
     if rc:
         log.debug("No spec file found under %s" % spec_rev)
         return None
-    else:
-        return dest_spec
+    with open(dest_spec, "w") as specf:
+        utils.checked_call(['git', 'show', spec_rev], stdout=specf)
+    return dest_spec
 
 def check_git_hash(url, tag, sha, got_sha, nocheck):
     efmt = "Hash mismatch for %s tag %s\n    expected: %s\n    actual:   %s"
