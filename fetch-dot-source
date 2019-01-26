@@ -6,10 +6,9 @@ import getopt
 import sys
 import os
 
-from osgbuild.main import log, log_consolehandler
-
+from osgbuild.main          import log, log_consolehandler
+from osgbuild.error         import Error
 from osgbuild.fetch_sources import C, process_dot_source
-from osgbuild.error import Error
 
 def usage():
     print("Usage: {script} [-d destdir] [-n] [-s] upstream.source [...]\n\n"
