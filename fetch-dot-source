@@ -6,9 +6,7 @@ import getopt
 import sys
 import os
 
-import osgbuild.main
-
-log = osgbuild.main.log
+from osgbuild.main import log, log_consolehandler
 
 from osgbuild.fetch_sources import C, process_dot_source
 from osgbuild.error import Error
@@ -25,6 +23,10 @@ def usage():
           "  -a           set upstream cache prefix to UW AFS location\n"
           .format(script=os.path.basename(__file__)))
     sys.exit(0)
+
+def setloglevel(level):
+    log.setLevel(level)
+    log_consolehandler.setLevel(level)
 
 options = dict(
     cache_prefix = C.WEB_CACHE_PREFIX,
@@ -47,8 +49,8 @@ for op,val in ops:
     elif op == '-d': options['destdir'] = val
     elif op == '-c': options['cache_prefix'] = val
     elif op == '-a': options['cache_prefix'] = C.AFS_CACHE_PREFIX
-    elif op == '-v': log.setLevel(logging.DEBUG)
-    elif op == '-q': log.setLevel(logging.WARNING)
+    elif op == '-v': setloglevel(logging.DEBUG)
+    elif op == '-q': setloglevel(logging.WARNING)
 
 def main():
     for src in dot_sources:
