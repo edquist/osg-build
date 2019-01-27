@@ -35,6 +35,39 @@ else:
     logging.basicConfig(format="%(message)s", level=logging.INFO)
 
 
+# common fetch options not found in .source line
+FetchOptions = collections.namedtuple('FetchOptions',
+    ['destdir', 'cache_prefix', 'nocheck', 'want_spec']
+)
+
+def fetch_cached_source(relpath, sha1sum=None, ops=None):
+    uri = os.path.join(ops.cache_prefix, relpath)
+    return fetch_uri_source(uri, sha1sum, ops=ops)
+
+
+def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
+    if uri.startswith('/'):
+        uri = "file://" + uri
+        log.warning("Absolute path names in .source files break the 4th wall")
+
+    outfile = os.path.join(ops.destdir, os.path.basename(filename or uri))
+    got_sha1sum = download_uri(uri, outfile)
+    log.debug("got sha1sum=%s for uri=%s" % (got_sha1sum, uri))
+
+    if sha1sum: # or not ops.nocheck:
+        check_file_checksum(outfile, sha1sum, got_sha1sum, ops.nocheck)
+
+    return [outfile]
+
+def check_file_checksum(path, sha1sum, got_sha1sum, nocheck):
+    efmt = "sha1 mismatch for '%s':\n    expected: %s\n         got: %s"
+    if sha1sum != got_sha1sum:
+        msg = efmt % (path, sha1sum, got_sha1sum)
+        if nocheck:
+            log.warning(msg + "\n    (ignored)")
+        else:
+            raise Error(msg)
+
 def _required(item, key):
     if item is None:
         raise Error("No '%s' specified" % key)
@@ -155,39 +188,6 @@ def download_uri(uri, outfile):
         raise Error("Unable to save downloaded file to %s\n%s" % (outfile, e))
     return sha.hexdigest()
 
-
-# common fetch options not found in .source line
-FetchOptions = collections.namedtuple('FetchOptions',
-    ['destdir', 'cache_prefix', 'nocheck', 'want_spec']
-)
-
-def fetch_cached_source(relpath, sha1sum=None, ops=None):
-    uri = os.path.join(ops.cache_prefix, relpath)
-    return fetch_uri_source(uri, sha1sum, ops=ops)
-
-
-def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
-    if uri.startswith('/'):
-        uri = "file://" + uri
-        log.warning("Absolute path names in .source files break the 4th wall")
-
-    outfile = os.path.join(ops.destdir, os.path.basename(filename or uri))
-    got_sha1sum = download_uri(uri, outfile)
-    log.debug("got sha1sum=%s for uri=%s" % (got_sha1sum, uri))
-
-    if sha1sum: # or not ops.nocheck:
-        check_file_checksum(outfile, sha1sum, got_sha1sum, ops.nocheck)
-
-    return [outfile]
-
-def check_file_checksum(path, sha1sum, got_sha1sum, nocheck):
-    efmt = "sha1 mismatch for '%s':\n    expected: %s\n         got: %s"
-    if sha1sum != got_sha1sum:
-        msg = efmt % (path, sha1sum, got_sha1sum)
-        if nocheck:
-            log.warning(msg + "\n    (ignored)")
-        else:
-            raise Error(msg)
 
 def dual_filter(cond, seq):
     pos,neg = [],[]
