@@ -236,8 +236,10 @@ def process_source_spec(line, ops):
       relpath:  upstream cache relative path (type=cached)
 
 
-    default args may be provided to automatically determine type:
+    if type is unspecified, it can be inferred by the first argument:
 
+        unnamed-arg1         -> inferred-type
+        --------------------    -------------
         owner/repo.git       -> github
         proto://.../repo.git -> git
         pkg/version/file.ext -> cached
@@ -245,13 +247,16 @@ def process_source_spec(line, ops):
         /abs/path/to/file    -> uri (file://)
 
 
-    unnamed args will be interpreted for each type:
+    some initial unnamed args are allowed for each type:
 
-        github: repo tag  [hash]
-        git:    url  tag  [hash]
+        github: repo [tag [hash]]
+        git:    url  [tag [hash]]
 
         cached: relpath [sha1sum]
         uri:    uri     [sha1sum]
+
+
+    (all other args must be specified as name=value keyword args)
     """
 
     args,kv = parse_meta_url(line)
