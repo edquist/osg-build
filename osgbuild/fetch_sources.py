@@ -94,6 +94,16 @@ FetchOptions = collections.namedtuple('FetchOptions',
     ['destdir', 'cache_prefix', 'nocheck', 'want_spec']
 )
 
+# fetch handlers are defined like:
+#
+#   fetch_xyz_source(
+#       required_named_or_positional_arg, ...,
+#       optional_named_or_positional_arg=None, ...,
+#       ops=None,  # no positional args allowed after 'ops'; only named fields
+#       named_arg=None, ...,
+#       **kw  # only list if extra args are intended (to pass to another fn)
+#   )
+
 def fetch_cached_source(relpath, sha1sum=None, ops=None):
     uri = os.path.join(ops.cache_prefix, relpath)
     return fetch_uri_source(uri, sha1sum, ops=ops)
