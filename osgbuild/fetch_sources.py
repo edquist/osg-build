@@ -264,10 +264,23 @@ def process_source_spec(line, ops):
     )
     meta_type = kv.pop('type', None) or get_auto_uri_type(*args, **kv)
     if meta_type in handlers:
-        return handlers[meta_type](*args, ops=ops, **kv)
+        try:
+            return handlers[meta_type](*args, ops=ops, **kv)
+        except TypeError:
+            fancy_usage_error(meta_type, handlers[meta_type], args)
     else:
         raise Error("Unrecognized type '%s' (valid types are: %s)"
                     % (meta_type, sorted(handlers)))
+
+def fancy_usage_error(meta_type, handler, args):
+    varnames = handler.__code__.co_varnames
+    maxargs = varnames.index('ops')
+    posargs = ' '.join( "[%s=]..." % vn for vn in varnames[:maxargs] )
+    log.error("Error processing source line of type '%s'" % meta_type)
+    log.error("Max unnamed arguments allowed is %s: %s" % (maxargs, posargs))
+    log.error("Provided %s:" % len(args))
+    log.error("  " + ' '.join(args))
+    raise Error("Invalid parameters for source line of type %s" % meta_type)
 
 def deref_git_sha(sha):
     cmd = ["git", "rev-parse", "-q", "--verify", sha + "^{}"]
