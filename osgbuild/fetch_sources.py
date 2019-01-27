@@ -228,6 +228,14 @@ def check_git_hash(url, tag, sha, got_sha, nocheck):
         else:
             raise Error(msg)
 
+def deref_git_sha(sha):
+    cmd = ["git", "rev-parse", "-q", "--verify", sha + "^{}"]
+    output, rc = utils.sbacktick(cmd)
+    if rc:
+        log.error("Git failed to parse rev: '%s'" % sha)
+        return sha
+    return output
+
 def chunked_read(handle, size=64*1024):
     chunk = handle.read(size)
     while chunk:
@@ -323,14 +331,6 @@ def fancy_source_error(meta_type, explicit_type, handler, args, kw, e):
     else:
         log.error(e)
     raise Error("Invalid parameters for %s=%s source line" % (xtype,meta_type))
-
-def deref_git_sha(sha):
-    cmd = ["git", "rev-parse", "-q", "--verify", sha + "^{}"]
-    output, rc = utils.sbacktick(cmd)
-    if rc:
-        log.error("Git failed to parse rev: '%s'" % sha)
-        return sha
-    return output
 
 def process_dot_source(cache_prefix, sfilename, destdir, nocheck, want_spec):
     """Read a .source file, fetch any sources specified in it."""
