@@ -236,12 +236,6 @@ def deref_git_sha(sha):
         return sha
     return output
 
-def chunked_read(handle, size=64*1024):
-    chunk = handle.read(size)
-    while chunk:
-        yield chunk
-        chunk = handle.read(size)
-
 def download_uri(uri, outfile):
     log.info('Retrieving ' + uri)
     try:
@@ -259,6 +253,11 @@ def download_uri(uri, outfile):
         raise Error("Unable to save downloaded file to %s\n%s" % (outfile, e))
     return sha.hexdigest()
 
+def chunked_read(handle, size=64*1024):
+    chunk = handle.read(size)
+    while chunk:
+        yield chunk
+        chunk = handle.read(size)
 
 def dual_filter(cond, seq):
     pos,neg = [],[]
