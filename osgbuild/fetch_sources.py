@@ -259,31 +259,6 @@ def chunked_read(handle, size=64*1024):
         yield chunk
         chunk = handle.read(size)
 
-def dual_filter(cond, seq):
-    pos,neg = [],[]
-    for x in seq:
-        (pos if cond(x) else neg).append(x)
-    return pos,neg
-
-def kvmatch(arg):
-    # return (key,val) for "key=val", else return (None, arg)
-    return re.search(r'^(?:(\w+)=)?(.*)', arg).groups()
-
-def parse_meta_url(line):
-    kv, args = dual_filter((lambda t: t[0]), map(kvmatch, line.split()))
-    return [ a[1] for a in args ], dict(kv)
-
-def get_auto_uri_type(*args, **kw):
-    if not args:
-        raise Error("No type specified and no default arg provided")
-    if re.search(r'^\w+://', args[0]):
-        return 'git' if args[0].endswith('.git') else 'uri'
-    elif args[0].startswith('/'):
-        return 'uri'
-    else:
-        return 'github' if args[0].endswith('.git') else 'cached'
-
-
 def process_source_spec(line, ops):
     args,kv = parse_meta_url(line)
 
@@ -305,6 +280,30 @@ def process_source_spec(line, ops):
     else:
         raise Error("Unrecognized type '%s' (valid types are: %s)"
                     % (meta_type, sorted(handlers)))
+
+def get_auto_uri_type(*args, **kw):
+    if not args:
+        raise Error("No type specified and no default arg provided")
+    if re.search(r'^\w+://', args[0]):
+        return 'git' if args[0].endswith('.git') else 'uri'
+    elif args[0].startswith('/'):
+        return 'uri'
+    else:
+        return 'github' if args[0].endswith('.git') else 'cached'
+
+def parse_meta_url(line):
+    kv, args = dual_filter((lambda t: t[0]), map(kvmatch, line.split()))
+    return [ a[1] for a in args ], dict(kv)
+
+def dual_filter(cond, seq):
+    pos,neg = [],[]
+    for x in seq:
+        (pos if cond(x) else neg).append(x)
+    return pos,neg
+
+def kvmatch(arg):
+    # return (key,val) for "key=val", else return (None, arg)
+    return re.search(r'^(?:(\w+)=)?(.*)', arg).groups()
 
 def fancy_source_error(meta_type, explicit_type, handler, args, kw, e):
     xtype = "type" if explicit_type else "implicit type"
