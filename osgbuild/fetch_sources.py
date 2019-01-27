@@ -1,6 +1,47 @@
 """Fetch sources from the upstream cache and combine them with sources from
 the osg/ dir in the package.
 
+    Process source spec line: [args...] [field=value...]
+
+    fields names:
+
+      type:     {git|github|uri|cached}
+      url:      git clone url (type=git)
+      name:     repo name if different from url basename (type=git, optional)
+      tag:      git tag or ref to archive (type=git/github)
+      hash:     git commit hash (type=git/github, optional if nocheck=True)
+      repo:     owner/repo (type=github)
+      prefix:   archive prefix dir if not name-tag (type=git/github, optional)
+      tarball:  archive name if not prefix.tar.gz (type=git/github, optional)
+                (setting tarball will also set a default prefix accordingly)
+      spec:     path rpm spec, if not rpm/name.spec (type=git/github, optional)
+      uri:      uri for file to download (type=uri)
+      filename: outfile if different than uri basename (type=uri, optional)
+      sha1sum:  chksum of downloaded file (type=uri, optional if nocheck=True)
+      relpath:  upstream cache relative path (type=cached)
+
+
+    some initial unnamed args are allowed for each type:
+
+        github: repo [tag [hash]]
+        git:    url  [tag [hash]]
+
+        cached: relpath [sha1sum]
+        uri:    uri     [sha1sum]
+
+
+    (all other args must be specified as name=value keyword args)
+
+
+    if type is unspecified, it can be inferred by the first argument:
+
+        unnamed-arg1         -> inferred-type
+        --------------------    -------------
+        owner/repo.git       -> github
+        proto://.../repo.git -> git
+        pkg/version/file.ext -> cached
+        proto://...          -> uri
+        /abs/path/to/file    -> uri (file://)
 """
 
 # pylint: disable=W0614
@@ -215,50 +256,6 @@ def get_auto_uri_type(*args, **kw):
 
 
 def process_source_spec(line, ops):
-    """
-    Process source spec line: [args...] [field=value...]
-
-    fields names:
-
-      type:     {git|github|uri|cached}
-      url:      git clone url (type=git)
-      name:     repo name if different from url basename (type=git, optional)
-      tag:      git tag or ref to archive (type=git/github)
-      hash:     git commit hash (type=git/github, optional if nocheck=True)
-      repo:     owner/repo (type=github)
-      prefix:   archive prefix dir if not name-tag (type=git/github, optional)
-      tarball:  archive name if not prefix.tar.gz (type=git/github, optional)
-                (setting tarball will also set a default prefix accordingly)
-      spec:     path rpm spec, if not rpm/name.spec (type=git/github, optional)
-      uri:      uri for file to download (type=uri)
-      filename: outfile if different than uri basename (type=uri, optional)
-      sha1sum:  chksum of downloaded file (type=uri, optional if nocheck=True)
-      relpath:  upstream cache relative path (type=cached)
-
-
-    some initial unnamed args are allowed for each type:
-
-        github: repo [tag [hash]]
-        git:    url  [tag [hash]]
-
-        cached: relpath [sha1sum]
-        uri:    uri     [sha1sum]
-
-
-    (all other args must be specified as name=value keyword args)
-
-
-    if type is unspecified, it can be inferred by the first argument:
-
-        unnamed-arg1         -> inferred-type
-        --------------------    -------------
-        owner/repo.git       -> github
-        proto://.../repo.git -> git
-        pkg/version/file.ext -> cached
-        proto://...          -> uri
-        /abs/path/to/file    -> uri (file://)
-    """
-
     args,kv = parse_meta_url(line)
 
     handlers = dict(
