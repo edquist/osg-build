@@ -259,7 +259,7 @@ def chunked_read(handle, size=64*1024):
         yield chunk
         chunk = handle.read(size)
 
-def process_source_spec(line, ops):
+def process_source_line(line, ops):
     args,kv = parse_meta_url(line)
 
     handlers = dict(
@@ -341,7 +341,7 @@ def process_dot_source(cache_prefix, sfilename, destdir, nocheck, want_spec):
         line = re.sub(r'(^|\s)#.*', '', line).strip()
         if line:
             try:
-                filenames += process_source_spec(line, ops)
+                filenames += process_source_line(line, ops)
             except Error as e:
                 log.error("Error processing source line: '%s'" % line)
                 raise
