@@ -279,21 +279,23 @@ def fancy_source_error(meta_type, explicit_type, handler, args, kw, e):
     xtype = "type" if explicit_type else "implicit type"
     log.error("Error processing source line of %s '%s'" % (xtype, meta_type))
     varnames = handler.__code__.co_varnames
+    fn_argcount = handler.__code__.co_argcount
     maxargs = varnames.index('ops')
     posargs = varnames[:maxargs]
+    posargs_provided = posargs[:len(args)]
+    dupe_args = set(posargs_provided) & set(kw)
+
     pos_usage = ' '.join("[%s=]arg%s" % (a,i+1) for i,a in enumerate(posargs))
-    named_provided = sorted(set(posargs) & set(kw))
-    tot_provided = len(named_provided) + len(args)
-    log.error("Up to %s unnamed initial arguments allowed: %s"
+    log.error("Up to %s unnamed initial arguments are allowed: %s"
               % (maxargs, pos_usage))
 
-    if tot_provided > maxargs:
-        if named_provided:
-            msg = ("Provided (%s) plus %s positional args: "
-                           % (', '.join(named_provided), len(args)))
-        else:
-            msg = "Provided %s: " % len(args)
-        log.error(msg + ' '.join(args))
+    if dupe_args:
+        for arg in dupe_args:
+            log.error("No unnamed positional arguments allowed after"
+                      " explicit '%s' named field" % arg)
+    elif len(args) > maxargs:
+        log.error("Provided %s positional arguments: %s"
+                  % (len(args), ' '.join(args)))
     else:
         log.error(e)
     raise Error("Invalid parameters for %s=%s source line" % (xtype,meta_type))
