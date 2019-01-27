@@ -108,7 +108,6 @@ def fetch_cached_source(relpath, sha1sum=None, ops=None):
     uri = os.path.join(ops.cache_prefix, relpath)
     return fetch_uri_source(uri, sha1sum, ops=ops)
 
-
 def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
     if uri.startswith('/'):
         uri = "file://" + uri
@@ -136,6 +135,9 @@ def _required(item, key):
     if item is None:
         raise Error("No '%s' specified" % key)
 
+def _nvl(arg, default):
+    return default if arg is None else arg
+
 def _mk_prefix(name, tag, tarball):
     if tarball:
         if not tarball.endswith('.tar.gz'):
@@ -154,14 +156,11 @@ def fetch_github_source(repo, tag, hash=None, ops=None, **kw):
     url = "https://github.com/" + repo
     return fetch_git_source(url, tag, hash, ops=ops, **kw)
 
-def nvl(arg, default):
-    return default if arg is None else arg
-
 def fetch_git_source(url, tag, hash=None, ops=None,
         name=None, spec=None, tarball=None, prefix=None):
     name = name or re.sub(r'\.git$', '', os.path.basename(url))
     ops.nocheck or _required(hash, 'hash')
-    spec = ops.want_spec and nvl(spec, "rpm/%s.spec" % name)
+    spec = ops.want_spec and _nvl(spec, "rpm/%s.spec" % name)
     prefix = prefix and prefix.strip('/')
     prefix = prefix or _mk_prefix(name, tag, tarball)
     tarball = tarball and os.path.basename(tarball)
