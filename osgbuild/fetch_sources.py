@@ -262,25 +262,41 @@ def process_source_spec(line, ops):
         cached = fetch_cached_source,
         uri    = fetch_uri_source,
     )
-    meta_type = kv.pop('type', None) or get_auto_uri_type(*args, **kv)
+    explicit_type = kv.pop('type', None)
+    meta_type = explicit_type or get_auto_uri_type(*args, **kv)
     if meta_type in handlers:
+        handler = handlers[meta_type]
         try:
-            return handlers[meta_type](*args, ops=ops, **kv)
-        except TypeError:
-            fancy_usage_error(meta_type, handlers[meta_type], args)
+            return handler(*args, ops=ops, **kv)
+        except TypeError as e:
+            fancy_source_error(meta_type, explicit_type, handler, args, kv, e)
+            raise
     else:
         raise Error("Unrecognized type '%s' (valid types are: %s)"
                     % (meta_type, sorted(handlers)))
 
-def fancy_usage_error(meta_type, handler, args):
+def fancy_source_error(meta_type, explicit_type, handler, args, kw, e):
+    xtype = "type" if explicit_type else "implicit type"
+    log.error("Error processing source line of %s '%s'" % (xtype, meta_type))
     varnames = handler.__code__.co_varnames
     maxargs = varnames.index('ops')
-    posargs = ' '.join( "[%s=]..." % vn for vn in varnames[:maxargs] )
-    log.error("Error processing source line of type '%s'" % meta_type)
-    log.error("Max unnamed arguments allowed is %s: %s" % (maxargs, posargs))
-    log.error("Provided %s:" % len(args))
-    log.error("  " + ' '.join(args))
-    raise Error("Invalid parameters for source line of type %s" % meta_type)
+    posargs = varnames[:maxargs]
+    pos_usage = ' '.join("[%s=]arg%s" % (a,i+1) for i,a in enumerate(posargs))
+    named_provided = sorted(set(posargs) & set(kw))
+    tot_provided = len(named_provided) + len(args)
+    log.error("Up to %s unnamed initial arguments allowed: %s"
+              % (maxargs, pos_usage))
+
+    if tot_provided > maxargs:
+        if named_provided:
+            msg = ("Provided (%s) plus %s positional args: "
+                           % (', '.join(named_provided), len(args)))
+        else:
+            msg = "Provided %s: " % len(args)
+        log.error(msg + ' '.join(args))
+    else:
+        log.error(e)
+    raise Error("Invalid parameters for %s=%s source line" % (xtype,meta_type))
 
 def deref_git_sha(sha):
     cmd = ["git", "rev-parse", "-q", "--verify", sha + "^{}"]
