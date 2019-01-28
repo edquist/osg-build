@@ -268,7 +268,7 @@ def process_source_line(line, ops):
         uri    = fetch_uri_source,
     )
     explicit_type = kv.pop('type', None)
-    meta_type = explicit_type or get_auto_uri_type(*args, **kv)
+    meta_type = explicit_type or get_auto_source_type(*args, **kv)
     if meta_type in handlers:
         handler = handlers[meta_type]
         try:
@@ -280,7 +280,7 @@ def process_source_line(line, ops):
         raise Error("Unrecognized type '%s' (valid types are: %s)"
                     % (meta_type, sorted(handlers)))
 
-def get_auto_uri_type(*args, **kw):
+def get_auto_source_type(*args, **kw):
     if not args:
         raise Error("No type specified and no default arg provided")
     if re.search(r'^\w+://', args[0]):
