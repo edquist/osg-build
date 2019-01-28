@@ -275,7 +275,6 @@ def process_source_line(line, ops):
             return handler(*args, ops=ops, **kv)
         except TypeError as e:
             fancy_source_error(meta_type, explicit_type, handler, args, kv, e)
-            raise
     else:
         raise Error("Unrecognized type '%s' (valid types are: %s)"
                     % (meta_type, sorted(handlers)))
