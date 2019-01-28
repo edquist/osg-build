@@ -259,7 +259,7 @@ def deref_git_sha(sha):
     return output
 
 def process_source_line(line, ops):
-    args,kv = parse_meta_url(line)
+    args,kv = parse_source_line(line)
 
     handlers = dict(
         git    = fetch_git_source,
@@ -290,7 +290,7 @@ def get_auto_uri_type(*args, **kw):
     else:
         return 'github' if args[0].endswith('.git') else 'cached'
 
-def parse_meta_url(line):
+def parse_source_line(line):
     kv, args = dual_filter((lambda t: t[0]), map(kvmatch, line.split()))
     return [ a[1] for a in args ], dict(kv)
 
