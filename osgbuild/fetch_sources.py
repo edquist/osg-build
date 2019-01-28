@@ -231,9 +231,9 @@ def git_archive_remote_ref(url, tag, hash, prefix, tarball, spec, ops):
 
     return list(filter(None, [dest_tar_gz, spec]))
 
-def try_get_spec(destdir, got_sha, spec):
+def try_get_spec(destdir, tree_sha, spec):
     dest_spec = os.path.join(destdir, os.path.basename(spec))
-    spec_rev = '%s:%s' % (got_sha, spec)
+    spec_rev = '%s:%s' % (tree_sha, spec)
     _, rc = utils.sbacktick(['git', 'rev-parse', '-q', '--verify', spec_rev])
     if rc:
         log.debug("No spec file found under %s" % spec_rev)
