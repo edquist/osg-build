@@ -122,6 +122,29 @@ def fetch_uri_source(uri, sha1sum=None, ops=None, filename=None):
 
     return [outfile]
 
+def download_uri(uri, outfile):
+    log.info('Retrieving ' + uri)
+    try:
+        handle = urllib.request.urlopen(uri)
+    except urllib.error.URLError as err:
+        raise Error("Unable to download %s\n%s" % (uri, err))
+
+    sha = hashlib.sha1()
+    try:
+        with open(outfile, 'wb') as desthandle:
+            for chunk in chunked_read(handle):
+                desthandle.write(chunk)
+                sha.update(chunk)
+    except EnvironmentError as e:
+        raise Error("Unable to save downloaded file to %s\n%s" % (outfile, e))
+    return sha.hexdigest()
+
+def chunked_read(handle, size=64*1024):
+    chunk = handle.read(size)
+    while chunk:
+        yield chunk
+        chunk = handle.read(size)
+
 def check_file_checksum(path, sha1sum, got_sha1sum, nocheck):
     efmt = "sha1 mismatch for '%s':\n    expected: %s\n         got: %s"
     if sha1sum != got_sha1sum:
@@ -235,29 +258,6 @@ def deref_git_sha(sha):
         log.error("Git failed to parse rev: '%s'" % sha)
         return sha
     return output
-
-def download_uri(uri, outfile):
-    log.info('Retrieving ' + uri)
-    try:
-        handle = urllib.request.urlopen(uri)
-    except urllib.error.URLError as err:
-        raise Error("Unable to download %s\n%s" % (uri, err))
-
-    sha = hashlib.sha1()
-    try:
-        with open(outfile, 'wb') as desthandle:
-            for chunk in chunked_read(handle):
-                desthandle.write(chunk)
-                sha.update(chunk)
-    except EnvironmentError as e:
-        raise Error("Unable to save downloaded file to %s\n%s" % (outfile, e))
-    return sha.hexdigest()
-
-def chunked_read(handle, size=64*1024):
-    chunk = handle.read(size)
-    while chunk:
-        yield chunk
-        chunk = handle.read(size)
 
 def process_source_line(line, ops):
     args,kv = parse_meta_url(line)
