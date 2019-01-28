@@ -38,7 +38,7 @@ Some initial unnamed args are allowed for each type:
 
     git:      url  [tag [hash]]
     github:   repo [tag [hash]]
-             
+
     cached:   relpath [sha1sum]
     uri:      uri     [sha1sum]
 
