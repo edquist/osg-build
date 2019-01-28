@@ -69,7 +69,6 @@ import re
 import os
 import tempfile
 import shutil
-import subprocess
 import sys
 try:
     from six.moves import urllib
